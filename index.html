@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio - Trang Cá Nhân</title>
+    <link rel="stylesheet" href="./style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h2>Portfolio</h2>
+            </div>
+            <nav class="nav-menu" id="nav-menu">
+                <ul class="nav-list">
+                    <li><a href="#home" class="nav-link active">Trang chủ</a></li>
+                    <li><a href="#about" class="nav-link">Giới thiệu</a></li>
+                    <li><a href="#experience" class="nav-link">Kinh nghiệm</a></li>
+                    <li><a href="#projects" class="nav-link">Dự án</a></li>
+                    <li><a href="./blog.html" class="nav-link" target="_self">Blog</a></li>
+                    <li><a href="./entertainment.html" class="nav-link" target="_self">Giải trí</a></li>
+                    <li><a href="#contact" class="nav-link">Liên hệ</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <button class="btn-login" id="loginBtn">Đăng nhập</button>
+                <button class="btn-register" id="registerBtn">Đăng ký</button>
+                <div class="user-menu" id="userMenu" style="display: none;">
+                    <span class="user-name" id="userName"></span>
+                    <div class="user-dropdown">
+                        <a href="#" id="adminPanel" style="display: none;">Quản trị</a>
+                        <a href="#" id="logoutBtn">Đăng xuất</a>
+                    </div>
+                </div>
+            </div>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Home Section -->
+        <section id="home" class="home section">
+            <div class="container">
+                <div class="home-content">
+                    <h1 class="home-title">Xin chào, Tôi là <span class="highlight">Edgar Dương</span></h1>
+                    <p class="home-description">Frontend Developer & UI/UX Designer</p>
+                    <p class="home-text">Tôi tạo ra những trải nghiệm web tuyệt vời với sự sáng tạo và kỹ thuật</p>
+                    <div class="home-buttons">
+                        <a href="#projects" class="btn btn-primary">Xem dự án</a>
+                        <a href="./blog.html" class="btn btn-primary">Blog</a>
+                        <a href="./entertainment.html" class="btn btn-primary">Giải trí</a>
+                    </div>
+                    <div class="home-social">
+                        <p>Kết nối với tôi:</p>
+                        <div class="home-social-links">
+                            <a href="https://web.facebook.com/edgar.duong.5" class="home-social-link facebook" target="_blank" title="Facebook">
+                                <i class="fab fa-facebook"></i>
+                            </a>
+                            <a href="https://www.tiktok.com/@edgarduong" class="home-social-link tiktok" target="_blank" title="TikTok">
+                                <i class="fab fa-tiktok"></i>
+                            </a>
+                            <a href="https://www.instagram.com/duongedgar/" class="home-social-link instagram" target="_blank" title="Instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="https://github.com/duongfjd" class="home-social-link github" target="_blank" title="GitHub">
+                                <i class="fab fa-github"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="home-image">
+                    <img src="https://scontent.fhan4-1.fna.fbcdn.net/v/t1.6435-9/155999569_1126202151196900_4722904334444813644_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeFuzdxDJ4SxcqiuzQuKMEKxzdmI0v_nAZLN2YjS_-cBkvw_jNJvwZ961MXXZGYZ4UyOTbKICw5CDguFzdzQo1re&_nc_ohc=WX-rHdTcIpwQ7kNvwEJ51dd&_nc_oc=AdlxCeTGzGazVuxpsThqpsi_wu4iZ1LiRMu6uwKiFVdmJX_xV0rt4SI707C9svH9uJU&_nc_zt=23&_nc_ht=scontent.fhan4-1.fna&_nc_gid=_C0DE5GNhYTZHoYl_yXWKQ&oh=00_AfbJ9ArgrCL5FLzF6CXZ7LPoJqbp9v3oJerAKg1CJtmZ-A&oe=69017946" alt="Profile" class="profile-img">
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="about section">
+            <div class="container">
+                <h2 class="section-title">Giới thiệu</h2>
+                <div class="about-content">
+                    <div class="about-image">
+                        <img src="https://via.placeholder.com/300x300/4A90E2/FFFFFF?text=About" alt="About">
+                    </div>
+                    <div class="about-text">
+                        <h3>Chào mừng đến với trang cá nhân của tôi</h3>
+                        <p>Tôi là một Frontend Developer với hơn 3 năm kinh nghiệm trong việc phát triển các ứng dụng web hiện đại. Tôi đam mê tạo ra những giao diện người dùng đẹp mắt và trải nghiệm người dùng tuyệt vời.</p>
+                        <p>Với kiến thức sâu rộng về HTML, CSS, JavaScript và các framework hiện đại như React, Vue.js, tôi luôn sẵn sàng đón nhận những thử thách mới.</p>
+                        <div class="about-stats">
+                            <div class="stat-item">
+                                <h4>50+</h4>
+                                <p>Dự án hoàn thành</p>
+                            </div>
+                            <div class="stat-item">
+                                <h4>3+</h4>
+                                <p>Năm kinh nghiệm</p>
+                            </div>
+                            <div class="stat-item">
+                                <h4>100+</h4>
+                                <p>Khách hàng hài lòng</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Experience Section -->
+        <section id="experience" class="experience section">
+            <div class="container">
+                <h2 class="section-title">Kinh nghiệm & Kỹ năng</h2>
+                <div class="experience-content">
+                    <div class="timeline">
+                        <h3>Học vấn & Kinh nghiệm</h3>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h4>Frontend Developer</h4>
+                                <p class="timeline-company">Công ty ABC - 2021 - Hiện tại</p>
+                                <p>Phát triển các ứng dụng web responsive, tối ưu hóa hiệu suất và trải nghiệm người dùng.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h4>UI/UX Designer</h4>
+                                <p class="timeline-company">Công ty XYZ - 2020 - 2021</p>
+                                <p>Thiết kế giao diện người dùng và trải nghiệm người dùng cho các ứng dụng web và mobile.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <h4>Cử nhân Công nghệ Thông tin</h4>
+                                <p class="timeline-company">Đại học ABC - 2016 - 2020</p>
+                                <p>Tốt nghiệp loại giỏi chuyên ngành Công nghệ Thông tin.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="skills">
+                        <h3>Kỹ năng chuyên môn</h3>
+                        <div class="skill-category">
+                            <h4>Frontend Development</h4>
+                            <div class="skill-items">
+                                <span class="skill-item">HTML5</span>
+                                <span class="skill-item">CSS3</span>
+                                <span class="skill-item">JavaScript</span>
+                                <span class="skill-item">React</span>
+                                <span class="skill-item">Vue.js</span>
+                                <span class="skill-item">TypeScript</span>
+                            </div>
+                        </div>
+                        <div class="skill-category">
+                            <h4>Tools & Technologies</h4>
+                            <div class="skill-items">
+                                <span class="skill-item">Git</span>
+                                <span class="skill-item">Webpack</span>
+                                <span class="skill-item">Node.js</span>
+                                <span class="skill-item">Figma</span>
+                                <span class="skill-item">Photoshop</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects" class="projects section">
+            <div class="container">
+                <h2 class="section-title">Dự án nổi bật</h2>
+                <div class="projects-grid">
+                    <div class="project-card">
+                        <div class="project-image">
+                            <img src="https://via.placeholder.com/400x250/4A90E2/FFFFFF?text=Project+1" alt="Project 1">
+                            <div class="project-overlay">
+                                <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" class="project-github"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                        <div class="project-content">
+                            <h3>E-commerce Website</h3>
+                            <p>Website thương mại điện tử với giao diện responsive và thanh toán trực tuyến.</p>
+                            <div class="project-tech">
+                                <span>React</span>
+                                <span>Node.js</span>
+                                <span>MongoDB</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <div class="project-image">
+                            <img src="https://via.placeholder.com/400x250/4A90E2/FFFFFF?text=Project+2" alt="Project 2">
+                            <div class="project-overlay">
+                                <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" class="project-github"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                        <div class="project-content">
+                            <h3>Portfolio Website</h3>
+                            <p>Website portfolio cá nhân với thiết kế hiện đại và animation mượt mà.</p>
+                            <div class="project-tech">
+                                <span>HTML</span>
+                                <span>CSS</span>
+                                <span>JavaScript</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <div class="project-image">
+                            <img src="https://via.placeholder.com/400x250/4A90E2/FFFFFF?text=Project+3" alt="Project 3">
+                            <div class="project-overlay">
+                                <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" class="project-github"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                        <div class="project-content">
+                            <h3>Task Management App</h3>
+                            <p>Ứng dụng quản lý công việc với giao diện trực quan và tính năng real-time.</p>
+                            <div class="project-tech">
+                                <span>Vue.js</span>
+                                <span>Firebase</span>
+                                <span>CSS3</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blog Section -->
+        <section id="blog" class="blog section">
+            <div class="container">
+                <h2 class="section-title">Bài viết mới nhất</h2>
+                <div class="blog-grid">
+                    <article class="blog-card">
+                        <div class="blog-image">
+                            <img src="https://via.placeholder.com/400x200/4A90E2/FFFFFF?text=Blog+1" alt="Blog 1">
+                        </div>
+                        <div class="blog-content">
+                            <div class="blog-meta">
+                                <span class="blog-date">15 Tháng 1, 2024</span>
+                                <span class="blog-category">Frontend</span>
+                            </div>
+                            <h3>10 Tips để viết CSS hiệu quả hơn</h3>
+                            <p>Khám phá những mẹo và thủ thuật hữu ích để viết CSS clean, maintainable và hiệu suất cao.</p>
+                            <a href="#" class="blog-link">Đọc thêm <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </article>
+                    <article class="blog-card">
+                        <div class="blog-image">
+                            <img src="https://via.placeholder.com/400x200/4A90E2/FFFFFF?text=Blog+2" alt="Blog 2">
+                        </div>
+                        <div class="blog-content">
+                            <div class="blog-meta">
+                                <span class="blog-date">10 Tháng 1, 2024</span>
+                                <span class="blog-category">JavaScript</span>
+                            </div>
+                            <h3>ES6+ Features bạn cần biết</h3>
+                            <p>Tìm hiểu về các tính năng mới trong JavaScript ES6+ và cách sử dụng chúng trong dự án thực tế.</p>
+                            <a href="#" class="blog-link">Đọc thêm <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </article>
+                    <article class="blog-card">
+                        <div class="blog-image">
+                            <img src="https://via.placeholder.com/400x200/4A90E2/FFFFFF?text=Blog+3" alt="Blog 3">
+                        </div>
+                        <div class="blog-content">
+                            <div class="blog-meta">
+                                <span class="blog-date">5 Tháng 1, 2024</span>
+                                <span class="blog-category">Design</span>
+                            </div>
+                            <h3>Nguyên tắc thiết kế UI/UX cơ bản</h3>
+                            <p>Những nguyên tắc vàng trong thiết kế giao diện người dùng và trải nghiệm người dùng.</p>
+                            <a href="#" class="blog-link">Đọc thêm <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Entertainment Section -->
+        <section id="entertainment" class="entertainment section">
+            <div class="container">
+                <h2 class="section-title">Giải trí</h2>
+                <div class="entertainment-content">
+                    <div class="entertainment-categories">
+                        <div class="category-grid">
+                            <div class="category-card" data-category="animation">
+                                <div class="category-icon">
+                                    <i class="fas fa-cube"></i>
+                                </div>
+                                <h3>Hoạt hình 3D</h3>
+                                <p>Xem các video hoạt hình 3D tuyệt đẹp</p>
+                            </div>
+                            <div class="category-card" data-category="reading">
+                                <div class="category-icon">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <h3>Đọc truyện</h3>
+                                <p>Thưởng thức các tác phẩm văn học hay</p>
+                            </div>
+                            <div class="category-card" data-category="movies">
+                                <div class="category-icon">
+                                    <i class="fas fa-film"></i>
+                                </div>
+                                <h3>Xem phim</h3>
+                                <p>Khám phá thế giới điện ảnh phong phú</p>
+                            </div>
+                            <div class="category-card" data-category="links">
+                                <div class="category-icon">
+                                    <i class="fas fa-link"></i>
+                                </div>
+                                <h3>Link tinh</h3>
+                                <p>Các trang web thú vị và hữu ích</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="entertainment-viewer">
+                        <div class="viewer-header">
+                            <h3 id="viewerTitle">Chọn một danh mục để bắt đầu</h3>
+                            <button class="btn-close-viewer" id="closeViewer" style="display: none;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="viewer-content" id="viewerContent">
+                            <div class="welcome-message">
+                                <i class="fas fa-play-circle"></i>
+                                <p>Chọn một trong các danh mục bên trên để khám phá nội dung giải trí!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact section">
+            <div class="container">
+                <h2 class="section-title">Liên hệ</h2>
+                <div class="contact-content">
+                    <div class="contact-info">
+                        <h3>Hãy liên hệ với tôi</h3>
+                        <p>Tôi luôn sẵn sàng thảo luận về các dự án mới và cơ hội hợp tác. Hãy gửi tin nhắn cho tôi!</p>
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <h4>Email</h4>
+                                <p>contact@example.com</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i>
+                            <div>
+                                <h4>Điện thoại</h4>
+                                <p>+84 123 456 789</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <h4>Địa chỉ</h4>
+                                <p>Hà Nội, Việt Nam</p>
+                            </div>
+                        </div>
+                    </div>
+                    <form class="contact-form" id="contactForm">
+                        <div class="form-group">
+                            <input type="text" id="contactName" name="name" placeholder="Tên của bạn" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="contactEmail" name="email" placeholder="Email của bạn" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="contactMessage" name="message" rows="5" placeholder="Nội dung tin nhắn" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Gửi tin nhắn</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3>Portfolio</h3>
+                    <p>Tạo ra những trải nghiệm web tuyệt vời</p>
+                </div>
+                <div class="footer-social">
+                    <h4>Theo dõi tôi</h4>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Portfolio. Tất cả quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Đăng nhập</h2>
+                <span class="close" id="closeLogin">&times;</span>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <input type="email" id="loginEmail" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="loginPassword" placeholder="Mật khẩu" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Đăng nhập</button>
+                <p class="modal-switch">Chưa có tài khoản? <a href="#" id="switchToRegister">Đăng ký ngay</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Đăng ký</h2>
+                <span class="close" id="closeRegister">&times;</span>
+            </div>
+            <form id="registerForm">
+                <div class="form-group">
+                    <input type="text" id="registerName" placeholder="Họ và tên" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="registerEmail" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="registerPassword" placeholder="Mật khẩu" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="registerConfirmPassword" placeholder="Xác nhận mật khẩu" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Đăng ký</button>
+                <p class="modal-switch">Đã có tài khoản? <a href="#" id="switchToLogin">Đăng nhập</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Panel Modal -->
+    <div class="modal" id="adminModal">
+        <div class="modal-content admin-modal">
+            <div class="modal-header">
+                <h2>Quản trị</h2>
+                <span class="close" id="closeAdmin">&times;</span>
+            </div>
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="personal">Thông tin cá nhân</button>
+                <button class="tab-btn" data-tab="projects">Dự án</button>
+                <button class="tab-btn" data-tab="blog">Blog</button>
+            </div>
+            <div class="admin-content">
+                <div class="tab-content active" id="personal">
+                    <form id="adminPersonalForm">
+                        <div class="form-group">
+                            <label>Tên hiển thị</label>
+                            <input type="text" id="adminName" placeholder="Tên hiển thị">
+                        </div>
+                        <div class="form-group">
+                            <label>Chức danh</label>
+                            <input type="text" id="adminTitle" placeholder="Chức danh">
+                        </div>
+                        <div class="form-group">
+                            <label>Mô tả</label>
+                            <textarea id="adminDescription" rows="4" placeholder="Mô tả về bản thân"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="adminEmail" placeholder="Email">
+                        </div>
+                        <div class="form-group">
+                            <label>Điện thoại</label>
+                            <input type="tel" id="adminPhone" placeholder="Điện thoại">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Cập nhật</button>
+                    </form>
+                </div>
+                <div class="tab-content" id="projects">
+                    <button class="btn btn-primary" id="addProjectBtn">Thêm dự án</button>
+                    <div class="projects-list" id="projectsList">
+                        <!-- Projects will be loaded here -->
+                    </div>
+                </div>
+                <div class="tab-content" id="blog">
+                    <button class="btn btn-primary" id="addBlogBtn">Thêm bài viết</button>
+                    <div class="blog-list" id="blogList">
+                        <!-- Blog posts will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script>
+        // Quick fix for AOS loading issue
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded successfully');
+            if (typeof AOS !== 'undefined') {
+                AOS.init({
+                    duration: 1000,
+                    once: true
+                });
+            }
+        });
+    </script>
+    <script src="./app.js"></script>
+</body>
+</html>

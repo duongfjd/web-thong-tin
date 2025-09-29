@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giải trí - Entertainment Hub</title>
+    <link rel="stylesheet" href="./entertainment.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h2>Entertainment Hub</h2>
+            </div>
+            <nav class="nav-menu">
+                <ul class="nav-list">
+                    <li><a href="./index.html" class="nav-link">Trang chủ</a></li>
+                    <li><a href="./blog.html" class="nav-link">Blog</a></li>
+                    <li><a href="#" class="nav-link active">Giải trí</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <button class="btn-login" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                </button>
+                <button class="btn-register" id="registerBtn">
+                    <i class="fas fa-user-plus"></i> Đăng ký
+                </button>
+                <div class="user-menu" id="userMenu" style="display: none;">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <span class="user-name" id="userName"></span>
+                    <div class="user-dropdown">
+                        <a href="#" id="userProfile">
+                            <i class="fas fa-user"></i> Hồ sơ
+                        </a>
+                        <a href="#" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <div class="entertainment-header">
+                <h1>Entertainment Hub</h1>
+                <p>Quản lý và thưởng thức nội dung giải trí của bạn</p>
+                <button class="btn btn-primary" id="addEntertainmentBtn" style="display: none;">
+                    <i class="fas fa-plus"></i> Thêm mới
+                </button>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="entertainment-filters">
+                <div class="filter-tabs">
+                    <button class="filter-btn active" data-category="all">
+                        <i class="fas fa-th"></i> Tất cả
+                    </button>
+                    <button class="filter-btn" data-category="animation">
+                        <i class="fas fa-cube"></i> Hoạt hình 3D
+                    </button>
+                    <button class="filter-btn" data-category="reading">
+                        <i class="fas fa-book"></i> Đọc truyện
+                    </button>
+                    <button class="filter-btn" data-category="movies">
+                        <i class="fas fa-film"></i> Xem phim
+                    </button>
+                    <button class="filter-btn" data-category="links">
+                        <i class="fas fa-link"></i> Link tinh
+                    </button>
+                </div>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Tìm kiếm...">
+                </div>
+            </div>
+
+            <!-- Entertainment Grid -->
+            <div class="entertainment-content">
+                <div class="entertainment-grid" id="entertainmentGrid">
+                    <!-- Entertainment items will be loaded here -->
+                </div>
+                
+                <!-- Empty State -->
+                <div class="empty-state" id="emptyState">
+                    <i class="fas fa-play-circle"></i>
+                    <h3>Chưa có nội dung giải trí</h3>
+                    <p>Hãy đăng nhập để thêm nội dung giải trí mới!</p>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <!-- Pagination buttons will be generated here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Entertainment Card Template -->
+    <template id="entertainmentCardTemplate">
+        <div class="entertainment-card">
+            <div class="card-header">
+                <div class="category-badge">
+                    <i class="category-icon"></i>
+                    <span class="category-text"></span>
+                </div>
+                <div class="card-actions" style="display: none;">
+                    <button class="btn-edit" title="Chỉnh sửa">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-delete" title="Xóa">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <h3 class="card-title"></h3>
+                <p class="card-description"></p>
+                <div class="card-meta">
+                    <span class="card-author">
+                        <i class="fas fa-user"></i>
+                        <span class="author-name"></span>
+                    </span>
+                    <span class="card-date">
+                        <i class="fas fa-calendar"></i>
+                        <span class="date-text"></span>
+                    </span>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-primary card-view-btn">
+                    <i class="fas fa-play"></i> Xem ngay
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <!-- Modals -->
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Đăng nhập</h2>
+                <span class="close" id="closeLogin">&times;</span>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <input type="email" id="loginEmail" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="loginPassword" placeholder="Mật khẩu" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Đăng nhập</button>
+                <p class="modal-switch">Chưa có tài khoản? <a href="#" id="switchToRegister">Đăng ký ngay</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Đăng ký</h2>
+                <span class="close" id="closeRegister">&times;</span>
+            </div>
+            <form id="registerForm">
+                <div class="form-group">
+                    <input type="text" id="registerName" placeholder="Họ và tên" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="registerEmail" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="registerPassword" placeholder="Mật khẩu" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="registerConfirmPassword" placeholder="Xác nhận mật khẩu" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Đăng ký</button>
+                <p class="modal-switch">Đã có tài khoản? <a href="#" id="switchToLogin">Đăng nhập</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Entertainment Modal -->
+    <div class="modal" id="entertainmentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Thêm nội dung giải trí</h2>
+                <span class="close" id="closeEntertainment">&times;</span>
+            </div>
+            <form id="entertainmentForm">
+                <div class="form-group">
+                    <label for="entertainmentTitle">Tiêu đề *</label>
+                    <input type="text" id="entertainmentTitle" placeholder="Nhập tiêu đề" required>
+                </div>
+                <div class="form-group">
+                    <label for="entertainmentCategory">Danh mục *</label>
+                    <select id="entertainmentCategory" required>
+                        <option value="">-- Chọn danh mục --</option>
+                        <option value="animation">Hoạt hình 3D</option>
+                        <option value="reading">Đọc truyện</option>
+                        <option value="movies">Xem phim</option>
+                        <option value="links">Link tinh</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="entertainmentUrl">URL *</label>
+                    <input type="url" id="entertainmentUrl" placeholder="https://example.com" required>
+                    <small class="form-help">Nhập đường dẫn tới nội dung (phải có https://)</small>
+                </div>
+                <div class="form-group">
+                    <label for="entertainmentDescription">Mô tả</label>
+                    <textarea id="entertainmentDescription" rows="4" placeholder="Mô tả về nội dung này..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelEntertainment">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Lưu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Fullscreen Iframe Modal -->
+    <div class="fullscreen-modal" id="iframeModal">
+        <div class="iframe-header">
+            <div class="iframe-title">
+                <i class="fas fa-external-link-alt"></i>
+                <span id="iframeTitle">Entertainment Viewer</span>
+            </div>
+            <div class="iframe-controls">
+                <button class="iframe-btn" id="refreshIframe" title="Làm mới">
+                    <i class="fas fa-redo"></i>
+                </button>
+                <button class="iframe-btn" id="fullscreenIframe" title="Toàn màn hình">
+                    <i class="fas fa-expand"></i>
+                </button>
+                <button class="iframe-btn" id="closeIframe" title="Đóng">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div class="iframe-container">
+            <iframe id="contentIframe" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
+            <div class="loading-overlay" id="iframeLoading">
+                <div class="loading-spinner"></div>
+                <p>Đang tải nội dung...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <script src="./entertainment.js"></script>
+</body>
+</html>

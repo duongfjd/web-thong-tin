@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Cộng Đồng - Portfolio</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./blog.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header blog-header" id="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h2>Blog Cộng Đồng</h2>
+            </div>
+            <nav class="nav-menu" id="nav-menu">
+                <ul class="nav-list">
+                    <li><a href="./index.html" class="nav-link">Trang chủ</a></li>
+                    <li><a href="#all-posts" class="nav-link active">Tất cả bài viết</a></li>
+                    <li><a href="#my-posts" class="nav-link" id="myPostsLink" style="display: none;">Bài viết của tôi</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <button class="btn-login" id="loginBtn">Đăng nhập</button>
+                <button class="btn-register" id="registerBtn">Đăng ký</button>
+                <div class="user-menu" id="userMenu" style="display: none;">
+                    <span class="user-name" id="userName"></span>
+                    <div class="user-dropdown">
+                        <a href="#" id="logoutBtn">Đăng xuất</a>
+                    </div>
+                </div>
+            </div>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="blog-main">
+        <div class="container">
+            <!-- Blog Header Section -->
+            <section class="blog-intro" data-aos="fade-up">
+                <h1>Cộng Đồng Blog</h1>
+                <p>Chia sẻ câu chuyện, kiến thức và trải nghiệm của bạn với cộng đồng</p>
+            </section>
+
+            <!-- Blog Controls -->
+            <div class="blog-controls" data-aos="fade-up" data-aos-delay="100">
+                <div class="blog-search">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Tìm kiếm bài viết...">
+                        <button type="button" id="searchBtn"><i class="fas fa-search"></i></button>
+                    </div>
+                    <div class="filter-box">
+                        <select id="categoryFilter">
+                            <option value="">Tất cả danh mục</option>
+                            <option value="technology">Công nghệ</option>
+                            <option value="lifestyle">Lối sống</option>
+                            <option value="travel">Du lịch</option>
+                            <option value="food">Ẩm thực</option>
+                            <option value="education">Giáo dục</option>
+                            <option value="entertainment">Giải trí</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="blog-actions">
+                    <button class="btn btn-primary" id="newPostBtn" style="display: none;">
+                        <i class="fas fa-plus"></i> Viết bài mới
+                    </button>
+                    <button class="btn btn-outline" id="toggleViewBtn">
+                        <i class="fas fa-th-large"></i> Dạng lưới
+                    </button>
+                </div>
+            </div>
+
+            <!-- Post Form Modal -->
+            <div class="modal" id="postModal">
+                <div class="modal-content post-modal">
+                    <div class="modal-header">
+                        <h2 id="postModalTitle">Viết bài mới</h2>
+                        <span class="close" id="closePostModal">&times;</span>
+                    </div>
+                    <form id="postForm">
+                        <div class="form-group">
+                            <label for="postTitle">Tiêu đề *</label>
+                            <input type="text" id="postTitle" name="title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="postCategory">Danh mục *</label>
+                            <select id="postCategory" name="category" required>
+                                <option value="">Chọn danh mục</option>
+                                <option value="technology">Công nghệ</option>
+                                <option value="lifestyle">Lối sống</option>
+                                <option value="travel">Du lịch</option>
+                                <option value="food">Ẩm thực</option>
+                                <option value="education">Giáo dục</option>
+                                <option value="entertainment">Giải trí</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="postContent">Nội dung *</label>
+                            <textarea id="postContent" name="content" rows="10" required placeholder="Viết nội dung bài viết của bạn..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="postTags">Tags (cách nhau bởi dấu phẩy)</label>
+                            <input type="text" id="postTags" name="tags" placeholder="ví dụ: javascript, tutorial, beginner">
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" id="cancelPost" class="btn btn-outline">Hủy</button>
+                            <button type="submit" class="btn btn-primary">Đăng bài</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Blog Content Tabs -->
+            <div class="blog-tabs" data-aos="fade-up" data-aos-delay="200">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="all-posts">Tất cả bài viết</button>
+                    <button class="tab-btn" data-tab="my-posts" id="myPostsTab" style="display: none;">Bài viết của tôi</button>
+                </div>
+                
+                <!-- All Posts Tab -->
+                <div class="tab-content active" id="all-posts">
+                    <div class="posts-container">
+                        <div class="posts-grid" id="allPostsGrid">
+                            <!-- Posts will be loaded here -->
+                        </div>
+                        <div class="posts-loading" id="postsLoading" style="display: none;">
+                            <div class="loading"></div>
+                            <p>Đang tải bài viết...</p>
+                        </div>
+                        <div class="no-posts" id="noPostsMessage" style="display: none;">
+                            <i class="fas fa-file-alt"></i>
+                            <p>Chưa có bài viết nào. Hãy là người đầu tiên chia sẻ!</p>
+                        </div>
+                    </div>
+                    <div class="pagination" id="pagination">
+                        <!-- Pagination will be added here -->
+                    </div>
+                </div>
+
+                <!-- My Posts Tab -->
+                <div class="tab-content" id="my-posts">
+                    <div class="posts-container">
+                        <div class="posts-grid" id="myPostsGrid">
+                            <!-- User's posts will be loaded here -->
+                        </div>
+                        <div class="no-posts" id="noMyPostsMessage">
+                            <i class="fas fa-edit"></i>
+                            <p>Bạn chưa có bài viết nào. Hãy viết bài đầu tiên!</p>
+                            <button class="btn btn-primary" onclick="openPostModal()">
+                                <i class="fas fa-plus"></i> Viết bài mới
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Post Detail Modal -->
+    <div class="modal" id="postDetailModal">
+        <div class="modal-content post-detail-modal">
+            <div class="modal-header">
+                <h2 id="detailPostTitle">Chi tiết bài viết</h2>
+                <span class="close" id="closePostDetailModal">&times;</span>
+            </div>
+            <div class="post-detail-content" id="postDetailContent">
+                <!-- Post detail will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div class="modal" id="confirmDeleteModal">
+        <div class="modal-content confirm-modal">
+            <div class="modal-header">
+                <h2>Xác nhận xóa</h2>
+                <span class="close" id="closeConfirmModal">&times;</span>
+            </div>
+            <div class="confirm-content">
+                <p>Bạn có chắc chắn muốn xóa bài viết này không?</p>
+                <div class="confirm-actions">
+                    <button class="btn btn-outline" id="cancelDelete">Hủy</button>
+                    <button class="btn btn-danger" id="confirmDelete">Xóa</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Đăng nhập</h2>
+                <span class="close" id="closeLogin">&times;</span>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <input type="email" id="loginEmail" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="loginPassword" placeholder="Mật khẩu" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Đăng nhập</button>
+                <p class="modal-switch">Chưa có tài khoản? <a href="#" id="switchToRegister">Đăng ký ngay</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Đăng ký</h2>
+                <span class="close" id="closeRegister">&times;</span>
+            </div>
+            <form id="registerForm">
+                <div class="form-group">
+                    <input type="text" id="registerName" placeholder="Họ và tên" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="registerEmail" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="registerPassword" placeholder="Mật khẩu" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="registerConfirmPassword" placeholder="Xác nhận mật khẩu" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Đăng ký</button>
+                <p class="modal-switch">Đã có tài khoản? <a href="#" id="switchToLogin">Đăng nhập</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script src="./blog.js"></script>
+</body>
+</html>

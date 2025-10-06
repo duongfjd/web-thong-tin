@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Links - Portfolio</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./projects.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="./index.html" style="text-decoration: none; color: inherit;">
+                    <h2>Portfolio</h2>
+                </a>
+            </div>
+            <nav class="nav-menu" id="nav-menu">
+                <ul class="nav-list">
+                    <li><a href="./index.html" class="nav-link">Trang chủ</a></li>
+                    <li><a href="./index.html#about" class="nav-link">Giới thiệu</a></li>
+                    <li><a href="./index.html#experience" class="nav-link">Kinh nghiệm</a></li>
+                    <li><a href="./projects.html" class="nav-link active">Links</a></li>
+                    <li><a href="./blog.html" class="nav-link" target="_self">Blog</a></li>
+                    <li><a href="./entertainment.html" class="nav-link" target="_self">Giải trí</a></li>
+                    <li><a href="./index.html#contact" class="nav-link">Liên hệ</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <button class="btn-login" id="loginBtn">Đăng nhập</button>
+                <button class="btn-register" id="registerBtn">Đăng ký</button>
+                <div class="user-menu" id="userMenu" style="display: none;">
+                    <span class="user-name" id="userName"></span>
+                    <div class="user-dropdown">
+                        <a href="#" id="adminPanel" style="display: none;">Quản trị</a>
+                        <a href="#" id="logoutBtn">Đăng xuất</a>
+                    </div>
+                </div>
+            </div>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="projects-main">
+        <div class="container">
+            <!-- Projects Header -->
+            <div class="projects-header">
+                <h1>Quản lý Links</h1>
+                <p>Lưu trữ và quản lý các liên kết hữu ích</p>
+                <button class="btn btn-primary" id="addLinkBtn">
+                    <i class="fas fa-plus"></i>
+                    Thêm Link Mới
+                </button>
+            </div>
+
+            <!-- Search and Filter -->
+            <div class="projects-controls">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Tìm kiếm links...">
+                </div>
+                <div class="filter-box">
+                    <select id="categoryFilter">
+                        <option value="">Tất cả danh mục</option>
+                        <option value="work">Công việc</option>
+                        <option value="study">Học tập</option>
+                        <option value="tools">Công cụ</option>
+                        <option value="entertainment">Giải trí</option>
+                        <option value="social">Mạng xã hội</option>
+                        <option value="other">Khác</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Projects Table -->
+            <div class="table-container">
+                <table class="projects-table" id="projectsTable">
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Tên Link</th>
+                            <th>URL</th>
+                            <th>Danh mục</th>
+                            <th>Mô tả</th>
+                            <th>Ngày tạo</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projectsTableBody">
+                        <!-- Links will be loaded here -->
+                    </tbody>
+                </table>
+                <div class="no-data" id="noDataMessage" style="display: none;">
+                    <i class="fas fa-link"></i>
+                    <h3>Chưa có link nào</h3>
+                    <p>Hãy thêm link đầu tiên của bạn!</p>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <!-- Pagination buttons will be added here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Add/Edit Link Modal -->
+    <div class="modal" id="linkModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Thêm Link Mới</h2>
+                <span class="close" id="closeLinkModal">&times;</span>
+            </div>
+            <form id="linkForm">
+                <div class="form-group">
+                    <label for="linkName">Tên Link <span class="required">*</span></label>
+                    <input type="text" id="linkName" name="name" placeholder="Nhập tên link" required>
+                </div>
+                <div class="form-group">
+                    <label for="linkUrl">URL <span class="required">*</span></label>
+                    <input type="url" id="linkUrl" name="url" placeholder="https://example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="linkCategory">Danh mục <span class="required">*</span></label>
+                    <select id="linkCategory" name="category" required>
+                        <option value="">Chọn danh mục</option>
+                        <option value="work">Công việc</option>
+                        <option value="study">Học tập</option>
+                        <option value="tools">Công cụ</option>
+                        <option value="entertainment">Giải trí</option>
+                        <option value="social">Mạng xã hội</option>
+                        <option value="other">Khác</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="linkDescription">Mô tả</label>
+                    <textarea id="linkDescription" name="description" rows="3" placeholder="Mô tả ngắn về link này..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Hủy</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Lưu Link</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content small">
+            <div class="modal-header">
+                <h2>Xác nhận xóa</h2>
+                <span class="close" id="closeDeleteModal">&times;</span>
+            </div>
+            <div class="delete-content">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Bạn có chắc chắn muốn xóa link này không?</p>
+                <p class="warning">Hành động này không thể hoàn tác!</p>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Xóa</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Đăng nhập</h2>
+                <span class="close" id="closeLogin">&times;</span>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <input type="email" id="loginEmail" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="loginPassword" placeholder="Mật khẩu" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Đăng nhập</button>
+                <p class="modal-switch">Chưa có tài khoản? <a href="#" id="switchToRegister">Đăng ký ngay</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Đăng ký</h2>
+                <span class="close" id="closeRegister">&times;</span>
+            </div>
+            <form id="registerForm">
+                <div class="form-group">
+                    <input type="text" id="registerName" placeholder="Họ và tên" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="registerEmail" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="registerPassword" placeholder="Mật khẩu" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="registerConfirmPassword" placeholder="Xác nhận mật khẩu" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Đăng ký</button>
+                <p class="modal-switch">Đã có tài khoản? <a href="#" id="switchToLogin">Đăng nhập</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <div class="notification-content">
+            <span class="notification-message"></span>
+            <button class="notification-close">&times;</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <script src="./projects.js"></script>
+</body>
+</html>

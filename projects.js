@@ -123,14 +123,9 @@ function handleAuthStateChange(user) {
     currentUser = user;
     updateAuthUI();
     
-    if (user) {
-        console.log('Loading links for user:', user.uid);
-        loadLinks();
-    } else {
-        console.log('User logged out, clearing data');
-        linksData = [];
-        renderTable();
-    }
+    // Load public links regardless of login status
+    console.log('Loading public links...');
+    loadLinks();
 }
 
 function updateAuthUI() {
@@ -193,10 +188,9 @@ function handleLogout() {
 
 // Links Management Functions
 async function loadLinks() {
-    if (!currentUser) return;
-
     try {
-        const snapshot = await database.ref(`users/${currentUser.uid}/links`).once('value');
+        // Load all public links from all users
+        const snapshot = await database.ref('publicLinks').once('value');
         const data = snapshot.val();
         linksData = data ? Object.entries(data).map(([id, link]) => ({ id, ...link })) : [];
         
@@ -247,7 +241,11 @@ function renderTable() {
 
     noDataMessage.style.display = 'none';
     
-    projectsTableBody.innerHTML = paginatedLinks.map((link, index) => `
+    projectsTableBody.innerHTML = paginatedLinks.map((link, index) => {
+        const isOwner = currentUser && link.createdBy && link.createdBy.uid === currentUser.uid;
+        const creatorName = link.createdBy ? link.createdBy.name : 'Ẩn danh';
+        
+        return `
         <tr class="fade-in">
             <td>${startIndex + index + 1}</td>
             <td>
@@ -268,6 +266,13 @@ function renderTable() {
                     ${link.description || 'Không có mô tả'}
                 </div>
             </td>
+            <td class="creator-cell">
+                <div class="creator-info" title="${creatorName}">
+                    <i class="fas fa-user"></i>
+                    ${creatorName}
+                    ${isOwner ? '<span class="owner-badge">(Bạn)</span>' : ''}
+                </div>
+            </td>
             <td class="date-cell">
                 ${formatDate(link.createdAt)}
             </td>
@@ -277,18 +282,25 @@ function renderTable() {
                         <i class="fas fa-external-link-alt"></i>
                         Truy cập
                     </button>
-                    <button class="action-btn btn-edit" onclick="editLink('${link.id}')" title="Chỉnh sửa">
-                        <i class="fas fa-edit"></i>
-                        Sửa
-                    </button>
-                    <button class="action-btn btn-delete" onclick="deleteLink('${link.id}')" title="Xóa">
-                        <i class="fas fa-trash"></i>
-                        Xóa
-                    </button>
+                    ${isOwner ? `
+                        <button class="action-btn btn-edit" onclick="editLink('${link.id}')" title="Chỉnh sửa">
+                            <i class="fas fa-edit"></i>
+                            Sửa
+                        </button>
+                        <button class="action-btn btn-delete" onclick="deleteLink('${link.id}')" title="Xóa">
+                            <i class="fas fa-trash"></i>
+                            Xóa
+                        </button>
+                    ` : `
+                        <button class="action-btn btn-disabled" disabled title="Chỉ chủ sở hữu mới có thể sửa">
+                            <i class="fas fa-lock"></i>
+                            Khóa
+                        </button>
+                    `}
                 </div>
             </td>
-        </tr>
-    `).join('');
+        </tr>`;
+    }).join('');
 }
 
 function renderPagination() {
@@ -445,18 +457,34 @@ async function handleLinkSubmit(e) {
 
     console.log('Saving link data:', linkData);
 
+    // Add user info for public links
+    linkData.createdBy = {
+        uid: currentUser.uid,
+        name: currentUser.displayName || currentUser.email,
+        email: currentUser.email
+    };
+
     try {
         if (editingLinkId) {
-            // Update existing link
+            // Update existing link (only if user owns it)
             console.log('Updating link:', editingLinkId);
-            await database.ref(`users/${currentUser.uid}/links/${editingLinkId}`).update(linkData);
-            showNotification('Link đã được cập nhật!', 'success');
+            const linkRef = database.ref(`publicLinks/${editingLinkId}`);
+            const linkSnapshot = await linkRef.once('value');
+            const existingLink = linkSnapshot.val();
+            
+            if (existingLink && existingLink.createdBy.uid === currentUser.uid) {
+                await linkRef.update(linkData);
+                showNotification('Link đã được cập nhật!', 'success');
+            } else {
+                showNotification('Bạn chỉ có thể sửa links của riêng mình!', 'error');
+                return;
+            }
         } else {
-            // Add new link
-            console.log('Adding new link for user:', currentUser.uid);
+            // Add new public link
+            console.log('Adding new public link for user:', currentUser.uid);
             linkData.createdAt = new Date().toISOString();
-            await database.ref(`users/${currentUser.uid}/links`).push(linkData);
-            showNotification('Link đã được thêm!', 'success');
+            await database.ref('publicLinks').push(linkData);
+            showNotification('Link đã được thêm và chia sẻ công khai!', 'success');
         }
 
         closeModal(linkModal);
@@ -484,8 +512,18 @@ async function confirmDelete() {
     if (!editingLinkId || !currentUser) return;
 
     try {
-        await database.ref(`users/${currentUser.uid}/links/${editingLinkId}`).remove();
-        showNotification('Link đã được xóa!', 'success');
+        // Check if user owns the link before deleting
+        const linkRef = database.ref(`publicLinks/${editingLinkId}`);
+        const linkSnapshot = await linkRef.once('value');
+        const existingLink = linkSnapshot.val();
+        
+        if (existingLink && existingLink.createdBy.uid === currentUser.uid) {
+            await linkRef.remove();
+            showNotification('Link đã được xóa!', 'success');
+        } else {
+            showNotification('Bạn chỉ có thể xóa links của riêng mình!', 'error');
+        }
+        
         closeModal(deleteModal);
         editingLinkId = null;
         await loadLinks();

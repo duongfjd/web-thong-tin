@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Cộng Đồng - Portfolio</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./chat.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="header" id="header">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="./index.html" style="text-decoration: none; color: inherit;">
+                    <h2>Portfolio</h2>
+                </a>
+            </div>
+            <nav class="nav-menu" id="nav-menu">
+                <ul class="nav-list">
+                    <li><a href="./index.html" class="nav-link">Trang chủ</a></li>
+                    <li><a href="./projects.html" class="nav-link">Links</a></li>
+                    <li><a href="./blog.html" class="nav-link">Blog</a></li>
+                    <li><a href="./entertainment.html" class="nav-link">Giải trí</a></li>
+                    <li><a href="./chat.html" class="nav-link active">Chat</a></li>
+                    <li><a href="./index.html#contact" class="nav-link">Liên hệ</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <button class="btn-login" id="loginBtn">Đăng nhập</button>
+                <button class="btn-register" id="registerBtn">Đăng ký</button>
+                <div class="user-menu" id="userMenu" style="display: none;">
+                    <span class="user-name" id="userName"></span>
+                    <div class="user-dropdown">
+                        <a href="#" id="logoutBtn">Đăng xuất</a>
+                    </div>
+                </div>
+            </div>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <main class="chat-main">
+        <div class="container">
+            <section class="chat-intro">
+                <h1>Kênh Chat Cộng Đồng</h1>
+                <p>Trao đổi nhanh theo phòng chủ đề, realtime cho mọi người.</p>
+            </section>
+
+            <section class="chat-layout">
+                <aside class="chat-sidebar">
+                    <div class="sidebar-card">
+                        <div class="sidebar-head">
+                            <h3><i class="fas fa-hashtag"></i> Phòng chat</h3>
+                        </div>
+                        <div id="roomsList" class="rooms-list"></div>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <div class="sidebar-head">
+                            <h3><i class="fas fa-user-friends"></i> Đang online</h3>
+                        </div>
+                        <div id="onlineUsers" class="online-users"></div>
+                    </div>
+                </aside>
+
+                <section class="chat-panel">
+                    <div class="chat-header-panel">
+                        <div>
+                            <h2 id="roomTitle">#general</h2>
+                            <p id="roomDescription">Phòng thảo luận chung cho cộng đồng</p>
+                        </div>
+                        <div class="chat-header-controls">
+                            <input type="text" id="searchInput" class="search-input" placeholder="Tìm tin nhắn..." style="display: none;">
+                            <button class="btn-icon" id="searchBtn" aria-label="Tìm kiếm"><i class="fas fa-search"></i></button>
+                            <button class="btn-icon" id="adminBtn" aria-label="Admin" style="display: none;"><i class="fas fa-cogs"></i></button>
+                        </div>
+                        <div class="chat-meta" id="chatMeta">0 thành viên online</div>
+                    </div>
+
+                    <div class="pinned-messages" id="pinnedMessages" style="display: none;">
+                        <div class="pinned-header">
+                            <span><i class="fas fa-thumbtack"></i> Tin nhắn ghim</span>
+                            <button class="btn-icon-small" id="closePinned" aria-label="Đóng">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="pinnedList" class="pinned-list"></div>
+                    </div>
+
+                    <div class="messages" id="messagesContainer"></div>
+
+                    <div class="replying-bar" id="replyingBar" style="display: none;">
+                        <div class="replying-content">
+                            <strong id="replyingToName"></strong>
+                            <span id="replyingToText"></span>
+                        </div>
+                        <button type="button" class="replying-close" id="cancelReplyBtn" aria-label="Hủy trả lời">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <form id="messageForm" class="chat-composer">
+                        <button type="button" class="btn-icon" id="emojiBtn" aria-label="Mở emoji">
+                            <i class="far fa-smile"></i>
+                        </button>
+                        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                        <button type="button" class="btn-icon" id="imageBtn" aria-label="Gửi ảnh">
+                            <i class="fas fa-image"></i>
+                        </button>
+                        <input
+                            type="text"
+                            id="messageInput"
+                            placeholder="Nhập tin nhắn..."
+                            maxlength="500"
+                            autocomplete="off"
+                            required
+                        >
+                        <button type="submit" class="btn btn-primary" id="sendBtn">
+                            <i class="fas fa-paper-plane"></i> Gửi
+                        </button>
+                    </form>
+                    <div id="imagePreview" class="image-preview" style="display: none;">
+                        <img id="previewImg" alt="Preview">
+                        <button type="button" class="btn-icon-small" id="removeImageBtn"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="emoji-picker" id="emojiPicker" style="display: none;"></div>
+                    <p class="chat-hint">Giới hạn chống spam: 1 tin/giây · Tối đa 500 ký tự.</p>
+                </section>
+            </section>
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Đăng nhập</h2>
+                <span class="close" id="closeLogin">&times;</span>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <input type="email" id="loginEmail" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="loginPassword" placeholder="Mật khẩu" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Đăng nhập</button>
+                <p class="modal-switch">Chưa có tài khoản? <a href="#" id="switchToRegister">Đăng ký ngay</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Đăng ký</h2>
+                <span class="close" id="closeRegister">&times;</span>
+            </div>
+            <form id="registerForm">
+                <div class="form-group">
+                    <input type="text" id="registerName" placeholder="Họ và tên" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="registerEmail" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="registerPassword" placeholder="Mật khẩu" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="registerConfirmPassword" placeholder="Xác nhận mật khẩu" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Đăng ký</button>
+                <p class="modal-switch">Đã có tài khoản? <a href="#" id="switchToLogin">Đăng nhập</a></p>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <script type="module" src="./chat.js"></script>
+</body>
+</html>

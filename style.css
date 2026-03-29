@@ -1503,3 +1503,209 @@ main {
     pointer-events: auto;
 }
 
+/* =====================================
+   2026 UI/UX REFRESH LAYER (NON-BREAKING)
+===================================== */
+
+:root {
+    --ui-primary: #4A90E2;
+    --ui-primary-600: #357ABD;
+    --ui-text: #1f2937;
+    --ui-text-soft: #64748b;
+    --ui-surface: #ffffff;
+    --ui-surface-soft: #f8fafc;
+    --ui-border: #e2e8f0;
+    --ui-shadow-sm: 0 6px 20px rgba(15, 23, 42, 0.08);
+    --ui-shadow-md: 0 16px 40px rgba(15, 23, 42, 0.12);
+    --ui-radius: 16px;
+}
+
+body {
+    color: var(--ui-text);
+    background:
+        radial-gradient(circle at 10% 10%, rgba(74, 144, 226, 0.08), transparent 30%),
+        radial-gradient(circle at 90% 0%, rgba(102, 126, 234, 0.08), transparent 35%),
+        #ffffff;
+}
+
+.container {
+    max-width: 1240px;
+}
+
+.header {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.header.scrolled {
+    box-shadow: var(--ui-shadow-sm);
+}
+
+.nav-link {
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background: rgba(74, 144, 226, 0.1);
+}
+
+.nav-link::after {
+    display: none;
+}
+
+.btn,
+.btn-login,
+.btn-register {
+    border-radius: 999px;
+}
+
+.btn {
+    box-shadow: 0 6px 18px rgba(74, 144, 226, 0.18);
+}
+
+.section {
+    padding: clamp(3rem, 6vw, 5.5rem) 0;
+}
+
+.section-title {
+    letter-spacing: -0.02em;
+}
+
+.home {
+    min-height: calc(100vh - 80px);
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.home-buttons {
+    flex-wrap: wrap;
+}
+
+.home-buttons .btn {
+    min-width: 150px;
+    text-align: center;
+}
+
+.profile-img,
+.project-card,
+.blog-card,
+.stat-item,
+.contact-form,
+.timeline-content,
+.entertainment-viewer,
+.category-card,
+.modal-content {
+    border-radius: var(--ui-radius);
+}
+
+.project-card,
+.blog-card,
+.timeline-content,
+.contact-form,
+.stat-item,
+.modal-content {
+    border: 1px solid var(--ui-border);
+    box-shadow: var(--ui-shadow-sm);
+}
+
+.project-card:hover,
+.blog-card:hover,
+.stat-item:hover {
+    box-shadow: var(--ui-shadow-md);
+}
+
+.contact-item i {
+    box-shadow: 0 8px 20px rgba(74, 144, 226, 0.25);
+}
+
+input,
+select,
+textarea,
+button,
+a {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid rgba(74, 144, 226, 0.35);
+    outline-offset: 2px;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+@media (max-width: 992px) {
+    .auth-buttons {
+        gap: 0.55rem;
+    }
+
+    .btn-login,
+    .btn-register {
+        padding: 0.45rem 0.9rem;
+    }
+
+    .home .container {
+        gap: 2.2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .header .container {
+        padding: 0.85rem 20px;
+    }
+
+    .nav-menu {
+        backdrop-filter: blur(8px);
+    }
+
+    .auth-buttons {
+        margin-left: auto;
+        margin-right: 0.75rem;
+    }
+
+    .home {
+        min-height: auto;
+    }
+
+    .home-content {
+        order: 2;
+    }
+
+    .home-image {
+        order: 1;
+    }
+
+    .home-buttons .btn {
+        min-width: 0;
+    }
+}
+
+@media (max-width: 560px) {
+    .auth-buttons {
+        display: none;
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+

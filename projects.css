@@ -654,3 +654,79 @@
         transform: translateY(0);
     }
 }
+
+/* 2026 projects polish */
+.projects-main {
+    background:
+        radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.2), transparent 35%),
+        linear-gradient(135deg, #4f7fda 0%, #6a5fd3 100%);
+}
+
+.projects-header h1 {
+    letter-spacing: -0.02em;
+}
+
+.projects-controls {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 14px;
+    padding: 1rem;
+    backdrop-filter: blur(8px);
+}
+
+.search-box input,
+.filter-box select {
+    min-height: 46px;
+    border: 1px solid #e2e8f0;
+}
+
+.table-container {
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+}
+
+.projects-table th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.projects-table tbody tr:hover {
+    background: #f1f5ff;
+}
+
+.action-btn {
+    border-radius: 999px;
+}
+
+.pagination button {
+    border: 1px solid transparent;
+}
+
+@media (max-width: 768px) {
+    .projects-controls {
+        padding: 0.85rem;
+    }
+
+    .table-container {
+        border-radius: 12px;
+    }
+
+    .projects-table {
+        min-width: 940px;
+    }
+}
+
+@media (max-width: 480px) {
+    .projects-header {
+        margin-bottom: 2rem;
+    }
+
+    .projects-header .btn {
+        margin: 0;
+    }
+
+    .public-notice {
+        line-height: 1.45;
+    }
+}

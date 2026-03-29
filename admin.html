@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Chat Moderation</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="header" id="header">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="./index.html" style="text-decoration: none; color: inherit;">
+                    <h2>Portfolio</h2>
+                </a>
+            </div>
+            <nav class="nav-menu" id="nav-menu">
+                <ul class="nav-list">
+                    <li><a href="./chat.html" class="nav-link">Chat</a></li>
+                    <li><a href="./index.html" class="nav-link">Trang chủ</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <div class="user-menu" id="userMenu" style="display: none;">
+                    <span class="user-name" id="userName"></span>
+                    <div class="user-dropdown">
+                        <a href="#" id="logoutBtn">Đăng xuất</a>
+                    </div>
+                </div>
+                <div id="notAdmin" style="color: #dc2626; font-weight: 600;">Bạn không phải Admin</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <div class="container">
+            <section class="admin-header">
+                <h1><i class="fas fa-shield-alt"></i> Admin Dashboard - Moderation</h1>
+                <p>Duyệt báo cáo, xóa tin nhắn, quản lý người dùng</p>
+            </section>
+
+            <section class="admin-content">
+                <div class="admin-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalReports">0</div>
+                        <div class="stat-label">Báo cáo chưa xử lý</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="resolvedCount">0</div>
+                        <div class="stat-label">Báo cáo đã xử lý</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="deletedCount">0</div>
+                        <div class="stat-label">Tin nhắn đã xóa</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="bannedCount">0</div>
+                        <div class="stat-label">Người dùng bị cấm</div>
+                    </div>
+                </div>
+
+                <div class="admin-filters">
+                    <select id="filterStatus" class="filter-select">
+                        <option value="">Tất cả báo cáo</option>
+                        <option value="pending">Chưa xử lý</option>
+                        <option value="resolved">Đã xử lý</option>
+                    </select>
+                    <select id="filterReason" class="filter-select">
+                        <option value="">Tất cả lý do</option>
+                        <option value="spam">Spam</option>
+                        <option value="hate speech">Hate Speech</option>
+                        <option value="NSFW">NSFW</option>
+                    </select>
+                    <button id="refreshBtn" class="btn btn-primary"><i class="fas fa-sync"></i> Tải lại</button>
+                </div>
+
+                <div class="reports-list" id="reportsList"></div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Ban User Modal -->
+    <div class="modal" id="banModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Cấm người dùng</h2>
+                <span class="close" id="closeBanModal">&times;</span>
+            </div>
+            <form id="banForm">
+                <div class="form-group">
+                    <label>Tên người dùng:</label>
+                    <p id="banUserName" style="font-weight: 600;"></p>
+                </div>
+                <div class="form-group">
+                    <label for="banReason">Lý do cấm:</label>
+                    <select id="banReason" required>
+                        <option value="">-- Chọn lý do --</option>
+                        <option value="spam">Spam</option>
+                        <option value="harassment">Qu騖 nhiễu</option>
+                        <option value="hate_speech">Phát biểu thù hận</option>
+                        <option value="other">Khác</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="banDuration">Thời gian cấm (giờ):</label>
+                    <input type="number" id="banDuration" min="1" max="720" value="24" required>
+                </div>
+                <button type="submit" class="btn btn-danger">Cấm người dùng</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script type="module" src="./admin.js"></script>
+</body>
+</html>

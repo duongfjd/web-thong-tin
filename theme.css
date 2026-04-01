@@ -314,6 +314,20 @@ label,
   gap: 16px;
 }
 
+/* Bootstrap row compatibility for index static sections */
+.projects-grid.row,
+.blog-grid.row,
+.category-grid.row {
+  display: flex !important;
+  flex-wrap: wrap;
+}
+
+.projects-grid.row .project-card,
+.blog-grid.row .blog-card,
+.category-grid.row .category-card {
+  width: 100%;
+}
+
 .stat-item,
 .skill-item,
 .project-tech span,
@@ -507,10 +521,25 @@ textarea:focus {
 }
 .tab-btn.active { background: rgba(106, 166, 255, 0.2); color: #fff; }
 
-.posts-grid {
+.posts-grid:not(.row) {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 14px;
+}
+
+.posts-grid.row {
+  display: flex !important;
+  flex-wrap: wrap;
+}
+
+.posts-grid.row .post-card,
+.posts-grid.row .blog-card {
+  width: 100%;
+}
+
+.posts-grid.list-view.row .post-card {
+  flex: 0 0 100%;
+  max-width: 100%;
 }
 
 /* Entertainment */
@@ -524,10 +553,19 @@ textarea:focus {
 }
 .filter-btn.active { background: rgba(106, 166, 255, 0.26); color: #fff; }
 
-.entertainment-grid {
+.entertainment-grid:not(.row) {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 14px;
+}
+
+.entertainment-grid.row {
+  display: flex !important;
+  flex-wrap: wrap;
+}
+
+.entertainment-grid.row .entertainment-card {
+  width: 100%;
 }
 
 .card-header,
@@ -551,6 +589,57 @@ textarea:focus {
   grid-template-columns: 300px 1fr;
   gap: 14px;
   align-items: start;
+}
+
+.chat-main {
+  background: transparent !important;
+}
+
+.chat-intro h1,
+.chat-header-panel h2,
+.pinned-sender,
+.pinned-header {
+  color: #f3f7ff !important;
+}
+
+.chat-intro p,
+.chat-header-panel p,
+.chat-hint,
+.pinned-text,
+.search-empty {
+  color: var(--text-muted) !important;
+}
+
+.search-input,
+.image-preview,
+.pinned-messages,
+.pinned-item,
+.chat-meta {
+  background: rgba(20, 31, 63, 0.82) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.pinned-messages {
+  border-left: 3px solid #8fc2ff !important;
+}
+
+.pinned-item:hover {
+  background: rgba(106, 166, 255, 0.18) !important;
+}
+
+.btn-icon-small,
+.btn-icon,
+.replying-close {
+  color: #dbe7ff !important;
+  border-color: var(--border) !important;
+}
+
+.btn-icon-small:hover,
+.btn-icon:hover,
+.replying-close:hover {
+  color: #fff !important;
+  background: rgba(106, 166, 255, 0.24) !important;
 }
 
 .rooms-list,
@@ -699,4 +788,418 @@ textarea:focus {
   .btn, .btn-login, .btn-register { padding: 9px 10px; font-size: .9rem; }
   .chat-composer { grid-template-columns: auto auto 1fr; }
   #sendBtn { grid-column: 1 / -1; width: 100%; }
+}
+
+/* ===============================
+   FINAL CONSISTENCY OVERRIDES
+   =============================== */
+
+:root {
+  --bs-body-bg: #0d1530;
+  --bs-body-color: #e7edff;
+  --bs-border-color: rgba(155, 180, 255, 0.22);
+  --bs-secondary-color: #9fb0df;
+  --bs-tertiary-bg: rgba(20, 31, 63, 0.75);
+  --bs-card-bg: rgba(20, 31, 63, 0.8);
+  --bs-card-color: #e7edff;
+  --bs-modal-bg: rgba(20, 31, 63, 0.95);
+  --bs-modal-color: #e7edff;
+  --bs-table-bg: transparent;
+  --bs-table-color: #e7edff;
+  --bs-table-border-color: rgba(160, 183, 255, 0.22);
+  --bs-heading-color: #f3f7ff;
+}
+
+body,
+main,
+section,
+.projects-main,
+.blog-main,
+.chat-main,
+.admin-main,
+.main {
+  color: var(--text) !important;
+}
+
+/* Reset broad muted text rule from above to avoid random faded text */
+p,
+li,
+span,
+label {
+  color: inherit !important;
+}
+
+.home-description,
+.home-text,
+.about-text p,
+.timeline-content p,
+.project-content p,
+.blog-content p,
+.contact-info p,
+.entertainment-header p,
+.blog-intro p,
+.projects-header p,
+.timeline-company,
+.meta-label,
+.card-meta,
+.blog-meta,
+.form-help,
+.modal-switch,
+.empty-state p,
+.no-posts p,
+.no-data p {
+  color: var(--text-muted) !important;
+}
+
+/* Force dark surfaces over legacy white backgrounds */
+.card,
+.post-card,
+.project-card,
+.blog-card,
+.category-card,
+.entertainment-card,
+.stat-card,
+.report-card,
+.sidebar-card,
+.chat-panel,
+.table-container,
+.posts-container,
+.projects-header,
+.blog-intro,
+.blog-controls,
+.projects-controls,
+.entertainment-header,
+.entertainment-filters,
+.viewer-content,
+.timeline,
+.timeline-content,
+.skills,
+.skill-category,
+.contact-info,
+.contact-form,
+.modal-content,
+.modal-header,
+.delete-content,
+.confirm-content,
+.post-detail-content,
+.report-message,
+.chat-header-panel,
+.pinned-messages {
+  background: rgba(20, 31, 63, 0.82) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+.post-card .post-title,
+.post-card .post-excerpt,
+.post-card .post-date,
+.post-card .post-author span,
+.post-card .post-stats span,
+.entertainment-card .card-title,
+.entertainment-card .card-description,
+.entertainment-card .author-name,
+.entertainment-card .date-text,
+.entertainment-card .category-text {
+  color: var(--text) !important;
+}
+
+h1, h2, h3, h4, h5, h6,
+.post-title,
+.card-title,
+.report-title,
+.link-name,
+.creator-info,
+.message-sender,
+.stat-number {
+  color: #f3f7ff !important;
+}
+
+a,
+.link-url,
+.blog-link {
+  color: #8fd0ff !important;
+}
+
+a:hover,
+.blog-link:hover {
+  color: #c2e3ff !important;
+}
+
+.table,
+table,
+.table th,
+.table td,
+.projects-table th,
+.projects-table td {
+  color: var(--text) !important;
+  border-color: rgba(160, 183, 255, 0.22) !important;
+}
+
+.table thead th,
+.projects-table th {
+  background: rgba(106, 166, 255, 0.16) !important;
+  color: #e9f2ff !important;
+}
+
+.table-hover tbody tr:hover,
+.projects-table tr:hover {
+  background: rgba(106, 166, 255, 0.10) !important;
+}
+
+.form-control,
+.form-select,
+input,
+select,
+textarea {
+  background: rgba(8, 13, 28, 0.78) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+.form-control::placeholder,
+input::placeholder,
+textarea::placeholder {
+  color: #9bb2e5 !important;
+}
+
+.form-control:focus,
+.form-select:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  box-shadow: 0 0 0 0.2rem rgba(106, 166, 255, 0.22) !important;
+  border-color: #8fc2ff !important;
+}
+
+.btn-outline-primary,
+.btn-outline-danger,
+.btn-outline-secondary,
+.btn-outline-info,
+.btn-outline-light {
+  color: #dce9ff !important;
+  border-color: rgba(157, 185, 255, 0.45) !important;
+  background: rgba(106, 166, 255, 0.08) !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-danger:hover,
+.btn-outline-secondary:hover,
+.btn-outline-info:hover,
+.btn-outline-light:hover {
+  color: #fff !important;
+  background: rgba(106, 166, 255, 0.24) !important;
+}
+
+.badge,
+.category-tag,
+.owner-badge,
+.report-status,
+.skill-item,
+.post-tag,
+.project-tech span {
+  background: rgba(106, 166, 255, 0.24) !important;
+  color: #e8f2ff !important;
+  border-color: rgba(157, 185, 255, 0.45) !important;
+}
+
+/* ===============================
+   INDEX PAGE COLOR/LAYOUT FIXES
+   =============================== */
+#home,
+#about,
+#experience,
+#projects,
+#blog,
+#entertainment,
+#contact {
+  background: transparent !important;
+}
+
+#about .about-content,
+#experience .experience-content,
+#contact .contact-content,
+#entertainment .entertainment-content {
+  gap: 20px !important;
+}
+
+#about .about-text,
+#experience .timeline,
+#experience .skills,
+#projects .project-card,
+#blog .blog-card,
+#entertainment .category-card,
+#entertainment .entertainment-viewer,
+#contact .contact-info,
+#contact .contact-form {
+  background: rgba(20, 31, 63, 0.82) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}
+
+#about .stat-item {
+  background: rgba(16, 25, 52, 0.88) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
+}
+
+#about .stat-item h4,
+#projects .project-content h3,
+#blog .blog-content h3,
+#experience .timeline-content h4,
+#experience .skills h3,
+#experience .timeline h3,
+#contact h3,
+#entertainment .viewer-header h3,
+#entertainment .category-card h3 {
+  color: #f3f7ff !important;
+}
+
+#about .stat-item p,
+#projects .project-content p,
+#blog .blog-content p,
+#experience .timeline-content p,
+#experience .timeline-company,
+#contact .contact-info p,
+#entertainment .category-card p,
+#entertainment .welcome-message p,
+#entertainment .viewer-content,
+#contact .contact-item p {
+  color: var(--text-muted) !important;
+}
+
+#experience .timeline-dot {
+  border-color: rgba(20, 31, 63, 0.95) !important;
+  box-shadow: 0 0 0 4px rgba(106, 166, 255, 0.6) !important;
+}
+
+#entertainment .category-icon i,
+#contact .contact-item i,
+#contact .social-link i {
+  color: #bfe0ff !important;
+}
+
+/* ===============================
+   BLOG PAGE COLOR FIXES
+   =============================== */
+.blog-main,
+.blog-main .container,
+.blog-intro,
+.blog-controls,
+.blog-tabs,
+.tab-content,
+.posts-container,
+.post-card,
+.post-content,
+.post-detail-content,
+.detail-body,
+.detail-tags,
+.confirm-content {
+  color: var(--text) !important;
+  background-color: rgba(20, 31, 63, 0.82) !important;
+  border-color: var(--border) !important;
+}
+
+.blog-intro h1,
+.post-title,
+.detail-header h1,
+.detail-tags h4,
+.tab-btn {
+  color: #f3f7ff !important;
+}
+
+.blog-intro p,
+.post-excerpt,
+.post-date,
+.post-meta,
+.post-stats,
+.confirm-content p,
+.detail-content,
+.detail-content p,
+.posts-loading,
+.no-posts {
+  color: var(--text-muted) !important;
+}
+
+.tab-buttons,
+.tab-btn,
+.tab-btn.active {
+  background: rgba(12, 20, 42, 0.75) !important;
+  border-color: var(--border) !important;
+}
+
+.post-image .post-category {
+  background: rgba(11, 17, 35, 0.8) !important;
+  color: #bfe0ff !important;
+  border: 1px solid rgba(157, 185, 255, 0.45) !important;
+}
+
+/* ===============================
+   ENTERTAINMENT PAGE COLOR FIXES
+   =============================== */
+.main,
+.entertainment-header,
+.entertainment-filters,
+.entertainment-content,
+.entertainment-card,
+.entertainment-card .card-content,
+.empty-state,
+.modal-content,
+.iframe-container,
+.loading-overlay {
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+.entertainment-header h1 {
+  background: none !important;
+  -webkit-text-fill-color: #f3f7ff !important;
+  color: #f3f7ff !important;
+}
+
+.entertainment-header p,
+.card-description,
+.card-meta,
+.author-name,
+.date-text,
+.empty-state p,
+.search-box i {
+  color: var(--text-muted) !important;
+}
+
+.category-badge {
+  background: rgba(106, 166, 255, 0.2) !important;
+  color: #e8f2ff !important;
+  border: 1px solid rgba(157, 185, 255, 0.45) !important;
+}
+
+.category-badge.animation,
+.category-badge.reading,
+.category-badge.movies,
+.category-badge.links {
+  color: #e8f2ff !important;
+}
+
+.filter-btn,
+.filter-btn.active,
+.search-box input,
+.pagination button {
+  border-color: var(--border) !important;
+}
+
+.search-box input,
+.pagination button,
+.modal,
+.modal-content,
+.form-group input,
+.form-group select,
+.form-group textarea {
+  background: rgba(8, 13, 28, 0.78) !important;
+  color: var(--text) !important;
+}
+
+.empty-state h3,
+.card-title,
+.modal-header h2 {
+  color: #f3f7ff !important;
 }

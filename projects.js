@@ -246,7 +246,7 @@ function renderTable() {
         const creatorName = link.createdBy ? link.createdBy.name : 'Ẩn danh';
         
         return `
-        <tr class="fade-in">
+        <tr class="fade-in align-middle">
             <td>${startIndex + index + 1}</td>
             <td>
                 <div class="link-name" title="${link.name}">${link.name}</div>
@@ -278,21 +278,21 @@ function renderTable() {
             </td>
             <td>
                 <div class="action-buttons">
-                    <button class="action-btn btn-visit" onclick="visitLink('${link.url}')" title="Truy cập">
+                    <button class="action-btn btn-visit btn btn-sm btn-outline-info" onclick="visitLink('${link.url}')" title="Truy cập">
                         <i class="fas fa-external-link-alt"></i>
                         Truy cập
                     </button>
                     ${isOwner ? `
-                        <button class="action-btn btn-edit" onclick="editLink('${link.id}')" title="Chỉnh sửa">
+                        <button class="action-btn btn-edit btn btn-sm btn-outline-primary" onclick="editLink('${link.id}')" title="Chỉnh sửa">
                             <i class="fas fa-edit"></i>
                             Sửa
                         </button>
-                        <button class="action-btn btn-delete" onclick="deleteLink('${link.id}')" title="Xóa">
+                        <button class="action-btn btn-delete btn btn-sm btn-outline-danger" onclick="deleteLink('${link.id}')" title="Xóa">
                             <i class="fas fa-trash"></i>
                             Xóa
                         </button>
                     ` : `
-                        <button class="action-btn btn-disabled" disabled title="Chỉ chủ sở hữu mới có thể sửa">
+                        <button class="action-btn btn-disabled btn btn-sm btn-outline-secondary" disabled title="Chỉ chủ sở hữu mới có thể sửa">
                             <i class="fas fa-lock"></i>
                             Khóa
                         </button>

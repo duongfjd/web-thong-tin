@@ -1,8 +1,27 @@
+/* Default Light Theme Variables */
+:root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --text-muted: #777777;
+    --primary-color: #4A90E2;
+    --primary-hover: #357ABD;
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-navbar: rgba(255, 255, 255, 0.85);
+    --border-color: rgba(74, 144, 226, 0.1);
+    --shadow-sm: 0 5px 15px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
 /* Reset and Base Styles */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 html {
@@ -12,9 +31,9 @@ html {
 body {
     font-family: 'Poppins', sans-serif;
     line-height: 1.6;
-    color: #333;
+    color: var(--text-primary);
     overflow-x: hidden;
-    background-color: #fff;
+    background-color: var(--bg-primary);
 }
 
 .container {
@@ -29,15 +48,17 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    background: rgba(255, 255, 255, 0.95);
-    border-bottom: 1px solid rgba(74, 144, 226, 0.1);
+    background: var(--glass-navbar);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
     z-index: 1000;
     transition: all 0.3s ease;
 }
 
 .header.scrolled {
-    background: rgba(255, 255, 255, 0.98);
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    background: var(--glass-bg);
+    box-shadow: var(--shadow-md);
 }
 
 .header .container {

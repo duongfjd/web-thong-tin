@@ -1098,19 +1098,29 @@ if ('serviceWorker' in navigator) {
 
 function initializeThemeToggle() {
     const themeToggle = document.getElementById('themeToggle');
-    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    // Default system preference check is done in index.html head script
+    // which sets data-theme to 'light' or 'dark' on documentElement
     
     if (themeToggle) {
         themeToggle.addEventListener('click', function() {
-            document.body.classList.toggle('dark-theme');
-            localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            let newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            // Set the new theme
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // Toggle the theme stylesheet and icon
+            const darkStyle = document.getElementById('darkThemeStyle');
+            if (newTheme === 'light') {
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                if (darkStyle) darkStyle.disabled = true;
+            } else {
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                if (darkStyle) darkStyle.disabled = false;
+            }
         });
-    }
-    
-    // Load saved theme or use system preference
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark' || (!savedTheme && prefersDarkScheme.matches)) {
-        document.body.classList.add('dark-theme');
     }
 }
 

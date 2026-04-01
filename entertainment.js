@@ -552,6 +552,7 @@ function createEntertainmentCard(item) {
     const template = document.getElementById('entertainmentCardTemplate');
     const clone = template.content.cloneNode(true);
     const card = clone.querySelector('.entertainment-card');
+    card.classList.add('col-12', 'col-md-6', 'col-xl-4');
     
     card.setAttribute('data-id', item.id);
     
@@ -604,7 +605,7 @@ function renderPagination() {
     
     // Previous button
     paginationHTML += `
-        <button ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">
+        <button class="btn btn-sm btn-outline-light" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">
             <i class="fas fa-chevron-left"></i>
         </button>
     `;
@@ -613,7 +614,7 @@ function renderPagination() {
     for (let i = 1; i <= totalPages; i++) {
         if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
             paginationHTML += `
-                <button class="${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">
+                <button class="btn btn-sm ${i === currentPage ? 'btn-primary active' : 'btn-outline-light'}" onclick="changePage(${i})">
                     ${i}
                 </button>
             `;

@@ -402,7 +402,7 @@ function displayPosts() {
     } else {
         noPostsMessage.style.display = 'none';
         container.innerHTML = paginatedPosts.map(post => createPostCard(post)).join('');
-        container.className = `posts-grid ${currentView === 'list' ? 'list-view' : ''}`;
+        container.className = `posts-grid row g-4 ${currentView === 'list' ? 'list-view' : ''}`;
     }
     
     // Update pagination
@@ -416,7 +416,7 @@ function createPostCard(post) {
     const authorInitial = post.author ? post.author.charAt(0).toUpperCase() : 'U';
     
     return `
-        <article class="post-card fade-in" onclick="viewPost('${post.id}')">
+        <article class="post-card card h-100 col-12 col-md-6 col-xl-4 fade-in" onclick="viewPost('${post.id}')">
             <div class="post-image">
                 <div class="post-category">${getCategoryName(post.category)}</div>
             </div>
@@ -442,10 +442,10 @@ function createPostCard(post) {
                     </div>
                     ${isOwner ? `
                         <div class="post-actions">
-                            <button class="btn-edit" onclick="editPost(event, '${post.id}')" title="Chỉnh sửa">
+                            <button class="btn-edit btn btn-sm btn-outline-primary" onclick="editPost(event, '${post.id}')" title="Chỉnh sửa">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn-delete" onclick="deletePost(event, '${post.id}')" title="Xóa">
+                            <button class="btn-delete btn btn-sm btn-outline-danger" onclick="deletePost(event, '${post.id}')" title="Xóa">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>

@@ -28,32 +28,37 @@ export function CommandPalette() {
   }, [])
 
   useEffect(() => {
+    let isMounted = true
+
     if (!debouncedQuery) {
-      setResults([])
       return
     }
 
-    let isMounted = true
-    setLoading(true)
-
-    globalSearch(debouncedQuery)
-      .then((data) => {
-        if (isMounted) {
-          setResults(data)
-          setLoading(false)
-        }
-      })
-      .catch((err) => {
-        console.error(err)
-        if (isMounted) setLoading(false)
-      })
+    const timer = setTimeout(() => {
+      if (!isMounted) return
+      setLoading(true)
+      globalSearch(debouncedQuery)
+        .then((data) => {
+          if (isMounted) {
+            setResults(data)
+            setLoading(false)
+          }
+        })
+        .catch((err) => {
+          console.error(err)
+          if (isMounted) setLoading(false)
+        })
+    }, 0)
 
     return () => {
       isMounted = false
+      clearTimeout(timer)
     }
   }, [debouncedQuery])
 
   if (!open) return null
+
+  const activeResults = debouncedQuery ? results : []
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -82,13 +87,13 @@ export function CommandPalette() {
           </div>
           
           <Command.List className="max-h-[300px] overflow-y-auto p-2">
-            {!loading && query && results.length === 0 && (
+            {!loading && query && activeResults.length === 0 && (
               <Command.Empty className="py-6 text-center text-sm text-muted-foreground">
                 Không tìm thấy kết quả.
               </Command.Empty>
             )}
 
-            {results.map((item) => (
+            {activeResults.map((item) => (
               <Command.Item
                 key={`${item.type}-${item.id}`}
                 value={item.id}

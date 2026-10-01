@@ -55,7 +55,7 @@ export async function GET(request: Request) {
   ]
 
   // Group by day to calculate work summary
-  const sessionsByDay: Record<string, any[]> = {}
+  const sessionsByDay: Record<string, Array<{ check_in_at: string; check_out_at: string | null }>> = {}
   if (sessions) {
     sessions.forEach(s => {
       const dateStr = format(parseISO(s.check_in_at), 'yyyy-MM-dd')

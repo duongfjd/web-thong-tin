@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function checkIn(geoInfo?: any) {
+export async function checkIn(geoInfo?: Record<string, unknown>) {
   const supabase = await createClient()
 
   // Verify auth
@@ -43,7 +43,7 @@ export async function checkIn(geoInfo?: any) {
   return { success: true }
 }
 
-export async function checkOut(geoInfo?: any) {
+export async function checkOut(geoInfo?: Record<string, unknown>) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()

@@ -40,8 +40,9 @@ export async function fetchMetadata(urlStr: string): Promise<BookmarkMetadata> {
     if (isPrivateIP(address)) {
       throw new Error('Private IP access denied (SSRF prevention)');
     }
-  } catch (err: any) {
-    if (err.message.includes('SSRF')) throw err;
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (message.includes('SSRF')) throw err;
     throw new Error(`DNS resolution failed for ${urlObj.hostname}`);
   }
 
@@ -75,9 +76,10 @@ export async function fetchMetadata(urlStr: string): Promise<BookmarkMetadata> {
     if (html.length > 2 * 1024 * 1024) {
       throw new Error('Response too large');
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     clearTimeout(timeoutId);
-    throw new Error(err.message || 'Failed to fetch URL');
+    const message = err instanceof Error ? err.message : 'Failed to fetch URL';
+    throw new Error(message);
   }
 
   const $ = cheerio.load(html);

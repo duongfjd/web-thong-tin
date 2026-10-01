@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { addQuickExpense } from '@/features/expenses/actions'
-import { useActionState, useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 
 const MOCK_DATA = [
@@ -39,7 +39,7 @@ export default function ExpensesPage() {
         <Card>
           <CardHeader>
             <CardTitle>Nhập nhanh</CardTitle>
-            <CardDescription>Nhập theo cú pháp: "cafe 35k", "xăng 1tr"</CardDescription>
+            <CardDescription>Nhập theo cú pháp: &quot;cafe 35k&quot;, &quot;xăng 1tr&quot;</CardDescription>
           </CardHeader>
           <CardContent>
             <form ref={formRef} action={formAction} className="flex gap-2">
@@ -90,11 +90,11 @@ export default function ExpensesPage() {
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {MOCK_DATA.map((entry, index) => (
+                  {MOCK_DATA.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: any) => (typeof value === 'number' ? value.toLocaleString('vi-VN') : value) + ' đ'} />
+                <Tooltip formatter={(value) => (typeof value === 'number' ? value.toLocaleString('vi-VN') : String(value ?? '')) + ' đ'} />
               </PieChart>
             </ResponsiveContainer>
           </div>

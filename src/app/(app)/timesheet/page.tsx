@@ -85,7 +85,7 @@ export default async function TimesheetPage() {
               <p className="text-muted-foreground text-sm">Chưa có phiên nào hôm nay.</p>
             ) : (
               <ul className="space-y-3">
-                {todaySessions.map((s: any) => (
+                {todaySessions.map((s: { id: string; check_in_at: string; check_out_at: string | null; source?: string }) => (
                   <li key={s.id} className="text-sm flex justify-between border-b pb-2">
                     <span>
                       {new Date(s.check_in_at).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})} 

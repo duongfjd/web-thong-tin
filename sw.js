@@ -1,5 +1,5 @@
 /* Personal OS — Service Worker (minimal, cache-first for shell) */
-const CACHE = 'personal-os-v3';
+const CACHE = 'personal-os-v4';
 const SHELL = [
   './',
   './index.html',
@@ -8,6 +8,7 @@ const SHELL = [
   './css/components.css',
   './js/supabase-client.js',
   './js/utils.js',
+  './js/lunar.js',
   './js/auth.js',
   './js/router.js',
   './js/main.js',

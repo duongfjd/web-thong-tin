@@ -164,8 +164,31 @@ alter table public.clipboard enable row level security;
 create policy "clipboard_owner" on public.clipboard
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
--- Bật Realtime chỉ cho clipboard
+-- ================================================================
+-- SCRAPBOOK (Second Brain)
+-- ================================================================
+create table if not exists public.scrapbook (
+  id          text primary key default gen_random_uuid()::text,
+  user_id     uuid not null references auth.users(id) on delete cascade default auth.uid(),
+  title       text not null,
+  content     text,
+  type        text not null default 'note' check (type in ('link','image','document','note','file')),
+  mime_type   text,
+  tags        text[] default '{}',
+  pinned      boolean not null default false,
+  starred     boolean not null default true,
+  size        bigint default 0,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+create index if not exists scrapbook_user_idx on public.scrapbook(user_id, created_at desc);
+alter table public.scrapbook enable row level security;
+create policy "scrapbook_owner" on public.scrapbook
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Bật Realtime chỉ cho clipboard và scrapbook
 alter publication supabase_realtime add table public.clipboard;
+alter publication supabase_realtime add table public.scrapbook;
 
 -- ================================================================
 -- VERIFY RLS (kiểm tra tất cả bảng đều bật RLS)

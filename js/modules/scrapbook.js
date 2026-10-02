@@ -1,6 +1,6 @@
 /* ================================================================
    modules/scrapbook.js — Second Brain / Omni-Scrapbook
-   Storage: IndexedDB (files/blobs) + Supabase (important items)
+   Storage: IndexedDB (files/blobs) + Supabase Cloud Sync
    Features:
    - Paste (Ctrl+V): image, link, text auto-detection
    - Drag & Drop: PDF, PNG, JPG, DOCX, TXT
@@ -8,7 +8,7 @@
    - Filter tabs: All, Link, Document, Image, Note
    - Tag system + Pin to top
    - Realtime search
-   - Sync important items to Supabase
+   - Sync & Pull with Supabase Cloud
    ================================================================ */
 
 const Scrapbook = (() => {
@@ -66,6 +66,159 @@ const Scrapbook = (() => {
     });
   }
 
+  // ── Supabase Cloud Sync Helpers ──────────────────────────────────
+  async function syncItemToSupabase(item) {
+    const user = Auth.getUser();
+    if (!user || user.id === 'local_user') {
+      if (confirm('Bạn đang dùng chế độ Khách (Lưu trên máy). Đăng nhập tài khoản Supabase để lưu lên đám mây?')) {
+        Auth.signOut();
+      }
+      return false;
+    }
+
+    try {
+      // 1. Try scrapbook table
+      const scrapRecord = {
+        id:         item.id,
+        user_id:    user.id,
+        title:      item.title || 'Không có tiêu đề',
+        content:    item.content || '',
+        type:       item.type || 'note',
+        mime_type:  item.mimeType || '',
+        tags:       item.tags || [],
+        pinned:     !!item.pinned,
+        starred:    true,
+        size:       item.size || 0,
+        created_at: item.createdAt || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error } = await SB.from('scrapbook').upsert(scrapRecord);
+      if (error) {
+        // Fallback to snippets table if scrapbook table isn't created yet
+        if (error.code === '42P01') {
+          const snipRecord = {
+            id:          item.id,
+            user_id:     user.id,
+            title:       item.title || 'Không có tiêu đề',
+            body:        item.content || '',
+            language:    item.type || 'text',
+            tags:        item.tags || [],
+            is_pinned:   !!item.pinned,
+            created_at:  item.createdAt || new Date().toISOString(),
+          };
+          const { error: err2 } = await SB.from('snippets').upsert(snipRecord);
+          if (err2) throw err2;
+        } else {
+          throw error;
+        }
+      }
+
+      item.starred = true;
+      await idbPut(item);
+      return true;
+    } catch (err) {
+      console.error('Supabase sync error', err);
+      toast('Lỗi lưu Supabase: ' + (err.message || 'Không thành công'), 'error');
+      return false;
+    }
+  }
+
+  async function deleteItemFromSupabase(id) {
+    try {
+      await SB.from('scrapbook').delete().eq('id', id);
+      await SB.from('snippets').delete().eq('id', id);
+    } catch (e) {
+      console.warn('Delete from Supabase warning', e);
+    }
+  }
+
+  async function pullFromSupabase() {
+    const user = Auth.getUser();
+    if (!user || user.id === 'local_user') {
+      toast('Vui lòng đăng nhập tài khoản Supabase để kéo dữ liệu', 'warning');
+      return;
+    }
+
+    toast('Đang tải dữ liệu từ Supabase Cloud...', 'info');
+
+    let cloudItems = [];
+    try {
+      const { data: sData, error: sErr } = await SB.from('scrapbook').select('*');
+      if (!sErr && sData && sData.length > 0) {
+        cloudItems = sData.map(r => ({
+          id:        r.id,
+          title:     r.title,
+          content:   r.content,
+          type:      r.type || 'note',
+          mimeType:  r.mime_type || '',
+          tags:      r.tags || [],
+          pinned:    !!r.pinned,
+          starred:   true,
+          size:      r.size || 0,
+          createdAt: r.created_at,
+        }));
+      } else {
+        const { data: snipData, error: snipErr } = await SB.from('snippets').select('*');
+        if (!snipErr && snipData && snipData.length > 0) {
+          cloudItems = snipData.map(r => ({
+            id:        r.id,
+            title:     r.title,
+            content:   r.body,
+            type:      r.language || 'note',
+            mimeType:  '',
+            tags:      r.tags || [],
+            pinned:    !!r.is_pinned,
+            starred:   true,
+            size:      0,
+            createdAt: r.created_at,
+          }));
+        }
+      }
+    } catch (e) {
+      console.error('Pull from Supabase failed', e);
+    }
+
+    if (cloudItems.length === 0) {
+      toast('Chưa có dữ liệu nào trên Supabase Cloud', 'info');
+      return;
+    }
+
+    for (const item of cloudItems) {
+      await idbPut(item);
+      const existingIdx = allItems.findIndex(i => i.id === item.id);
+      if (existingIdx >= 0) allItems[existingIdx] = item;
+      else allItems.unshift(item);
+    }
+
+    renderGrid();
+    toast(`Đã kéo thành công ${cloudItems.length} mục từ Supabase!`, 'success');
+  }
+
+  async function syncAllToSupabase() {
+    const user = Auth.getUser();
+    if (!user || user.id === 'local_user') {
+      if (confirm('Bạn cần đăng nhập tài khoản Supabase để đồng bộ. Đăng nhập ngay?')) {
+        Auth.signOut();
+      }
+      return;
+    }
+
+    if (allItems.length === 0) {
+      toast('Chưa có mục nào để đồng bộ', 'info');
+      return;
+    }
+
+    toast(`Đang đồng bộ ${allItems.length} mục lên Supabase...`, 'info');
+    let successCount = 0;
+    for (const item of allItems) {
+      const ok = await syncItemToSupabase(item);
+      if (ok) successCount++;
+    }
+    renderGrid();
+    toast(`Đã đồng bộ ${successCount}/${allItems.length} mục lên Supabase!`, 'success');
+  }
+
   // ── Create item helpers ──────────────────────────────────────────
   function makeItem(type, data) {
     return {
@@ -76,7 +229,7 @@ const Scrapbook = (() => {
       mimeType:  data.mimeType || '',
       tags:      data.tags || [],
       pinned:    false,
-      starred:   false,     // starred = synced to Supabase
+      starred:   !!data.starred,     // starred = synced to Supabase
       createdAt: new Date().toISOString(),
       size:      data.size || 0,
     };
@@ -92,6 +245,7 @@ const Scrapbook = (() => {
   let filterType = 'all';
   let searchQ    = '';
   let container_ref = null;
+  let _previewItem  = null;
 
   // ── Render ───────────────────────────────────────────────────────
   async function render(container) {
@@ -102,10 +256,30 @@ const Scrapbook = (() => {
       return b.createdAt.localeCompare(a.createdAt);
     });
 
+    const user = Auth.getUser();
+    const isCloudUser = user && user.id !== 'local_user';
+
     container.innerHTML = `
       <div class="page-header">
-        <h2><i class="bi bi-journal-bookmark me-2"></i>Second Brain</h2>
+        <div>
+          <h2><i class="bi bi-journal-bookmark me-2"></i>Second Brain</h2>
+          <div class="small text-muted mt-1">
+            <span class="badge-pill ${isCloudUser ? 'badge-success' : 'badge-muted'}" style="font-size:11px">
+              <i class="bi ${isCloudUser ? 'bi-cloud-check-fill' : 'bi-hdd'} me-1"></i>
+              ${isCloudUser ? `Supabase: ${sanitize(user.email || 'Đã kết nối')}` : 'Chế độ lưu cục bộ (Offline)'}
+            </span>
+          </div>
+        </div>
+
         <div class="action-bar">
+          <!-- Supabase Sync Actions -->
+          <button class="btn-secondary btn-sm" id="sb-sync-all-btn" title="Tải tất cả lên Supabase Cloud">
+            <i class="bi bi-cloud-arrow-up text-primary"></i> <span class="d-none d-sm-inline">Lưu</span> Supabase
+          </button>
+          <button class="btn-secondary btn-sm" id="sb-pull-cloud-btn" title="Kéo dữ liệu từ Supabase Cloud về máy">
+            <i class="bi bi-cloud-download text-success"></i> <span class="d-none d-sm-inline">Kéo về</span>
+          </button>
+
           <button class="btn-primary btn-sm" id="sb-add-note-btn"><i class="bi bi-plus-lg"></i> Ghi chú</button>
           <button class="btn-secondary btn-sm" id="sb-add-link-btn"><i class="bi bi-link-45deg"></i> Link</button>
         </div>
@@ -126,6 +300,7 @@ const Scrapbook = (() => {
           <button class="filter-tab ${filterType === 'document' ? 'active' : ''}" data-type="document">📄 Tài liệu</button>
           <button class="filter-tab ${filterType === 'image'    ? 'active' : ''}" data-type="image">🖼️ Hình</button>
           <button class="filter-tab ${filterType === 'note'     ? 'active' : ''}" data-type="note">📝 Ghi chú</button>
+          <button class="filter-tab ${filterType === 'cloud'    ? 'active' : ''}" data-type="cloud">☁️ Supabase Cloud</button>
         </div>
         <div class="search-wrap" style="flex:1;min-width:160px">
           <i class="bi bi-search"></i>
@@ -141,10 +316,13 @@ const Scrapbook = (() => {
         <div class="modal-box modal-lg">
           <div class="modal-header">
             <span class="modal-title" id="sb-preview-title">Xem trước</span>
-            <div class="d-flex gap-1">
+            <div class="d-flex gap-2 align-items-center">
+              <button class="btn-secondary btn-sm d-flex align-items-center gap-1" id="sb-preview-star" title="Lưu/Gỡ khỏi Supabase Cloud">
+                <i class="bi bi-cloud-arrow-up"></i>
+                <span id="sb-preview-star-text">Lưu Supabase</span>
+              </button>
               <button class="btn-icon" id="sb-preview-pin" title="Ghim"><i class="bi bi-pin"></i></button>
-              <button class="btn-icon" id="sb-preview-star" title="Lưu Supabase"><i class="bi bi-star"></i></button>
-              <button class="btn-icon" id="sb-preview-download" title="Tải về"><i class="bi bi-download"></i></button>
+              <button class="btn-icon" id="sb-preview-download" title="Tải về / Copy"><i class="bi bi-download"></i></button>
               <button class="btn-icon" id="sb-preview-del" title="Xóa" style="color:var(--clr-danger)"><i class="bi bi-trash3"></i></button>
               <button class="btn-icon" id="sb-preview-close"><i class="bi bi-x-lg"></i></button>
             </div>
@@ -178,6 +356,12 @@ const Scrapbook = (() => {
               <label class="form-label">Tags</label>
               <input id="sb-note-tags" class="form-ctrl" placeholder="#congviec, #quantrong" />
             </div>
+            <div class="form-check mt-3">
+              <input class="form-check-input" type="checkbox" id="sb-note-sync-supabase" ${isCloudUser ? 'checked' : ''}>
+              <label class="form-check-label text-muted small" for="sb-note-sync-supabase">
+                <i class="bi bi-cloud-arrow-up text-primary me-1"></i>Đồng thời lưu lên Supabase Cloud
+              </label>
+            </div>
           </div>
           <div class="modal-footer">
             <button class="btn-ghost" id="sb-note-cancel">Hủy</button>
@@ -206,6 +390,12 @@ const Scrapbook = (() => {
               <label class="form-label">Tags</label>
               <input id="sb-link-tags" class="form-ctrl" placeholder="#congviec, #docs" />
             </div>
+            <div class="form-check mt-3">
+              <input class="form-check-input" type="checkbox" id="sb-link-sync-supabase" ${isCloudUser ? 'checked' : ''}>
+              <label class="form-check-label text-muted small" for="sb-link-sync-supabase">
+                <i class="bi bi-cloud-arrow-up text-primary me-1"></i>Đồng thời lưu lên Supabase Cloud
+              </label>
+            </div>
           </div>
           <div class="modal-footer">
             <button class="btn-ghost" id="sb-link-cancel">Hủy</button>
@@ -227,7 +417,9 @@ const Scrapbook = (() => {
     let items = allItems;
 
     // Filter
-    if (filterType !== 'all') {
+    if (filterType === 'cloud') {
+      items = items.filter(i => i.starred);
+    } else if (filterType !== 'all') {
       items = items.filter(i => i.type === filterType);
     }
 
@@ -235,16 +427,16 @@ const Scrapbook = (() => {
     if (searchQ) {
       const q = searchQ.toLowerCase();
       items = items.filter(i =>
-        i.title.toLowerCase().includes(q) ||
-        i.content.toLowerCase().includes(q) ||
-        i.tags.some(t => t.toLowerCase().includes(q))
+        (i.title || '').toLowerCase().includes(q) ||
+        (i.content || '').toLowerCase().includes(q) ||
+        (i.tags || []).some(t => t.toLowerCase().includes(q))
       );
     }
 
     if (items.length === 0) {
       grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
         <i class="bi bi-journal-x"></i>
-        <p>Chưa có mục nào. Kéo thả file, dán link, hoặc thêm ghi chú!</p>
+        <p>Chưa có mục nào ${filterType === 'cloud' ? 'được lưu trên Supabase Cloud' : ''}. Kéo thả file, dán link, hoặc thêm ghi chú!</p>
       </div>`;
       return;
     }
@@ -252,12 +444,13 @@ const Scrapbook = (() => {
     grid.innerHTML = items.map(item => {
       const thumb = getThumb(item);
       const icon  = getIcon(item);
-      const pinBadge = item.pinned ? `<span class="badge-pill badge-warning" style="position:absolute;top:6px;left:6px;font-size:10px"><i class="bi bi-pin-fill"></i></span>` : '';
-      const starBadge = item.starred ? `<span class="badge-pill badge-success" style="position:absolute;top:6px;left:${item.pinned ? '56px' : '6px'};font-size:10px"><i class="bi bi-star-fill"></i></span>` : '';
+      const pinBadge = item.pinned ? `<span class="badge-pill badge-warning" style="position:absolute;top:6px;left:6px;font-size:10px;z-index:2"><i class="bi bi-pin-fill"></i></span>` : '';
+      const cloudBadge = item.starred ? `<span class="badge-pill badge-success" style="position:absolute;top:6px;right:6px;font-size:10px;z-index:2" title="Đã lưu Supabase Cloud"><i class="bi bi-cloud-check-fill me-1"></i>Cloud</span>` : '';
 
       return `
         <div class="scrap-card ${item.pinned ? 'pinned' : ''}" data-id="${item.id}" data-type="${item.type}">
-          ${pinBadge}${starBadge}
+          ${pinBadge}
+          ${cloudBadge}
           <div class="scrap-card-thumb">
             ${thumb}
           </div>
@@ -268,12 +461,15 @@ const Scrapbook = (() => {
               <span class="truncate">${sanitize(item.type)}</span>
               <span class="ms-auto" style="white-space:nowrap">${relativeTime(item.createdAt)}</span>
             </div>
-            ${item.tags.length ? `<div class="tag-list mt-1" style="flex-wrap:nowrap;overflow:hidden">
+            ${item.tags && item.tags.length ? `<div class="tag-list mt-1" style="flex-wrap:nowrap;overflow:hidden">
               ${item.tags.slice(0,3).map(t => `<span class="badge-pill badge-muted" style="font-size:10px">#${sanitize(t)}</span>`).join('')}
             </div>` : ''}
           </div>
           <div class="scrap-card-actions">
-            <button class="btn-icon" style="width:28px;height:28px;background:var(--clr-surface)" data-pin="${item.id}" title="Ghim"><i class="bi bi-pin${item.pinned ? '-fill' : ''}"></i></button>
+            <button class="btn-icon ${item.starred ? 'text-success' : ''}" style="width:28px;height:28px;background:var(--clr-surface)" data-cloud="${item.id}" title="${item.starred ? 'Đã lưu trên Supabase Cloud (Click để gỡ)' : 'Lưu vào Supabase Cloud'}">
+              <i class="bi bi-cloud-${item.starred ? 'check-fill text-success' : 'arrow-up'}"></i>
+            </button>
+            <button class="btn-icon" style="width:28px;height:28px;background:var(--clr-surface)" data-pin="${item.id}" title="Ghim"><i class="bi bi-pin${item.pinned ? '-fill text-warning' : ''}"></i></button>
             <button class="btn-icon" style="width:28px;height:28px;background:var(--clr-surface);color:var(--clr-danger)" data-del="${item.id}" title="Xóa"><i class="bi bi-trash3"></i></button>
           </div>
         </div>
@@ -283,10 +479,34 @@ const Scrapbook = (() => {
     // Card click → preview
     grid.querySelectorAll('.scrap-card').forEach(card => {
       card.addEventListener('click', (e) => {
-        if (e.target.closest('[data-pin]') || e.target.closest('[data-del]')) return;
+        if (e.target.closest('[data-pin]') || e.target.closest('[data-del]') || e.target.closest('[data-cloud]')) return;
         const id = card.dataset.id;
         const item = allItems.find(i => i.id === id);
         if (item) showPreview(item);
+      });
+    });
+
+    // Cloud direct toggle
+    grid.querySelectorAll('[data-cloud]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.cloud;
+        const item = allItems.find(i => i.id === id);
+        if (!item) return;
+
+        if (!item.starred) {
+          btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span>`;
+          const ok = await syncItemToSupabase(item);
+          if (ok) {
+            toast('Đã lưu vào Supabase Cloud!', 'success');
+          }
+        } else {
+          await deleteItemFromSupabase(item.id);
+          item.starred = false;
+          await idbPut(item);
+          toast('Đã gỡ khỏi Supabase Cloud', 'info');
+        }
+        renderGrid();
       });
     });
 
@@ -314,6 +534,7 @@ const Scrapbook = (() => {
         e.stopPropagation();
         if (!confirm('Xóa mục này?')) return;
         await idbDel(btn.dataset.del);
+        await deleteItemFromSupabase(btn.dataset.del);
         allItems = allItems.filter(i => i.id !== btn.dataset.del);
         renderGrid();
         toast('Đã xóa', 'success');
@@ -339,7 +560,7 @@ const Scrapbook = (() => {
       return `<i class="bi bi-${isP ? 'file-pdf text-danger' : 'file-earmark-word text-primary'}" style="font-size:36px"></i>`;
     }
     if (item.type === 'note') {
-      const preview = item.content.slice(0, 80);
+      const preview = (item.content || '').slice(0, 80);
       return `<div style="padding:8px;font-size:11px;color:var(--clr-muted);text-align:left;overflow:hidden;max-height:100%">${sanitize(preview)}</div>`;
     }
     return '<i class="bi bi-file-earmark"></i>';
@@ -350,102 +571,91 @@ const Scrapbook = (() => {
     return icons[item.type] || '📁';
   }
 
-  function relativeTime(iso) {
-    const diff = Date.now() - new Date(iso).getTime();
-    const m = Math.floor(diff / 60000);
-    if (m < 1) return 'vừa xong';
-    if (m < 60) return m + ' phút trước';
-    const h = Math.floor(m / 60);
-    if (h < 24) return h + ' giờ trước';
-    const d = Math.floor(h / 24);
-    return d + ' ngày trước';
-  }
-
-  // ── Preview ─────────────────────────────────────────────────────
-  let _previewItem = null;
-
+  // ── Show Preview ─────────────────────────────────────────────────
   function showPreview(item) {
     _previewItem = item;
     const modal = el('sb-preview-modal');
-    const body  = el('sb-preview-body');
-    const titleEl = el('sb-preview-title');
-    if (!modal || !body) return;
+    if (!modal) return;
 
-    titleEl.textContent = item.title || 'Xem trước';
-    modal.classList.remove('d-none');
+    el('sb-preview-title').textContent = item.title || 'Xem trước';
 
-    // Render preview content
+    // Update cloud button in preview
+    const cloudBtn  = el('sb-preview-star');
+    const cloudText = el('sb-preview-star-text');
+    if (cloudBtn && cloudText) {
+      cloudBtn.className = `btn btn-sm d-flex align-items-center gap-1 ${item.starred ? 'btn-success text-white' : 'btn-secondary'}`;
+      cloudBtn.querySelector('i').className = `bi bi-cloud-${item.starred ? 'check-fill' : 'arrow-up'}`;
+      cloudText.textContent = item.starred ? 'Đã lưu Supabase' : 'Lưu Supabase';
+    }
+
+    const pinBtn = el('sb-preview-pin');
+    if (pinBtn) pinBtn.innerHTML = `<i class="bi bi-pin${item.pinned ? '-fill text-warning' : ''}"></i>`;
+
+    const body = el('sb-preview-body');
     if (item.type === 'image') {
-      body.innerHTML = `<img class="img-viewer" src="${item.content}" alt="${sanitize(item.title)}" />`;
+      body.innerHTML = `<img src="${item.content}" class="img-viewer" alt="${sanitize(item.title)}" />`;
     } else if (item.type === 'document' && item.mimeType === 'application/pdf') {
-      body.innerHTML = `<iframe class="pdf-viewer" src="${item.content}"></iframe>`;
+      body.innerHTML = `<iframe src="${item.content}" class="pdf-viewer"></iframe>`;
     } else if (item.type === 'link') {
       body.innerHTML = `
-        <div class="text-center py-3">
-          <i class="bi bi-globe2" style="font-size:48px;color:var(--clr-primary)"></i>
-          <h5 class="mt-3">${sanitize(item.title)}</h5>
-          <p class="text-muted mb-4">${sanitize(item.content)}</p>
-          <div class="d-flex gap-2 justify-content-center flex-wrap">
-            <button class="btn-primary" onclick="WebOpener.openModal('${sanitize(item.content)}')">
-              <i class="bi bi-window"></i> Mở trong cửa sổ
+        <div class="text-center py-4">
+          <i class="bi bi-link-45deg fs-1 text-primary"></i>
+          <h5 class="mt-2">${sanitize(item.title)}</h5>
+          <a href="${sanitize(item.content)}" target="_blank" rel="noopener" class="text-break">${sanitize(item.content)}</a>
+          <div class="mt-3">
+            <button class="btn-primary btn-sm" onclick="WebOpener.openModal('${sanitize(item.content)}')">
+              <i class="bi bi-window me-1"></i> Mở trong Web Opener
             </button>
-            <button class="btn-secondary" onclick="window.open('${sanitize(item.content)}','_blank')">
-              <i class="bi bi-box-arrow-up-right"></i> Tab mới
-            </button>
-            <button class="btn-secondary" onclick="navigator.clipboard.writeText('${sanitize(item.content)}')">
-              <i class="bi bi-copy"></i> Copy URL
-            </button>
+            <a href="${sanitize(item.content)}" target="_blank" rel="noopener" class="btn-secondary btn-sm ms-2">
+              <i class="bi bi-box-arrow-up-right me-1"></i> Mở tab mới
+            </a>
           </div>
         </div>
       `;
     } else {
-      body.innerHTML = `<div class="note-viewer">${sanitize(item.content)}</div>
-        <div class="d-flex justify-content-end mt-2">
-          <button class="btn-ghost btn-sm" onclick="navigator.clipboard.writeText(\`${item.content.replace(/`/g,'\\`')}\`)">
-            <i class="bi bi-copy"></i> Copy
-          </button>
-        </div>`;
+      body.innerHTML = `<div class="note-viewer">${sanitize(item.content)}</div>`;
     }
 
-    // Render tags
     renderPreviewTags(item);
-
-    // Pin / star buttons
-    const pinBtn  = el('sb-preview-pin');
-    const starBtn = el('sb-preview-star');
-    if (pinBtn)  { pinBtn.innerHTML  = `<i class="bi bi-pin${item.pinned ? '-fill' : ''}"></i>`; }
-    if (starBtn) { starBtn.innerHTML = `<i class="bi bi-star${item.starred ? '-fill' : ''}"></i>`; }
+    modal.classList.remove('d-none');
   }
 
   function renderPreviewTags(item) {
-    const tagsEl = el('sb-preview-tags');
-    if (!tagsEl) return;
-    tagsEl.innerHTML = item.tags.map((t, i) => `
-      <span class="tag-item">
+    const wrap = el('sb-preview-tags');
+    if (!wrap) return;
+    wrap.innerHTML = (item.tags || []).map((t, idx) => `
+      <span class="badge-pill badge-muted" style="font-size:11px">
         #${sanitize(t)}
-        <button class="tag-remove" data-ti="${i}">×</button>
+        <span style="cursor:pointer;margin-left:4px" data-rmtag="${idx}">×</span>
       </span>
     `).join('');
-    tagsEl.querySelectorAll('.tag-remove').forEach(btn => {
+
+    wrap.querySelectorAll('[data-rmtag]').forEach(btn => {
       btn.addEventListener('click', async () => {
-        item.tags.splice(+btn.dataset.ti, 1);
+        item.tags.splice(+btn.dataset.rmtag, 1);
         await idbPut(item);
+        if (item.starred) await syncItemToSupabase(item);
         renderPreviewTags(item);
+        renderGrid();
       });
     });
   }
 
-  // ── Bind events ─────────────────────────────────────────────────
+  // ── Bind Events ──────────────────────────────────────────────────
   function bindEvents(container) {
     // Filter tabs
     el('sb-filter-tabs')?.querySelectorAll('.filter-tab').forEach(btn => {
       btn.addEventListener('click', () => {
-        filterType = btn.dataset.type;
         el('sb-filter-tabs').querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+        filterType = btn.dataset.type;
         renderGrid();
       });
     });
+
+    // Supabase actions
+    el('sb-sync-all-btn')?.addEventListener('click', syncAllToSupabase);
+    el('sb-pull-cloud-btn')?.addEventListener('click', pullFromSupabase);
 
     // Search
     el('sb-search')?.addEventListener('input', (e) => {
@@ -473,7 +683,7 @@ const Scrapbook = (() => {
 
     // Paste handler (global when on this page)
     const pasteHandler = async (e) => {
-      if (!document.querySelector('#sb-grid')) return; // only active on scrapbook page
+      if (!document.querySelector('#sb-grid')) return;
 
       const items = [...(e.clipboardData?.items || [])];
 
@@ -499,10 +709,6 @@ const Scrapbook = (() => {
     };
     document.addEventListener('paste', pasteHandler);
 
-    // Cleanup paste on navigation
-    container.dataset.pasteCleanup = 'true';
-    container._pasteHandler = pasteHandler;
-
     // Preview close
     el('sb-preview-close')?.addEventListener('click', () => el('sb-preview-modal')?.classList.add('d-none'));
     el('sb-preview-modal')?.addEventListener('click', (e) => {
@@ -514,57 +720,60 @@ const Scrapbook = (() => {
       if (!_previewItem) return;
       _previewItem.pinned = !_previewItem.pinned;
       await idbPut(_previewItem);
+      if (_previewItem.starred) await syncItemToSupabase(_previewItem);
       allItems = await idbGetAll();
       allItems.sort((a, b) => {
         if (a.pinned !== b.pinned) return b.pinned - a.pinned;
         return b.createdAt.localeCompare(a.createdAt);
       });
-      el('sb-preview-pin').innerHTML = `<i class="bi bi-pin${_previewItem.pinned ? '-fill' : ''}"></i>`;
+      el('sb-preview-pin').innerHTML = `<i class="bi bi-pin${_previewItem.pinned ? '-fill text-warning' : ''}"></i>`;
       renderGrid();
       toast(_previewItem.pinned ? 'Đã ghim!' : 'Bỏ ghim', 'success');
     });
 
-    // Preview star (sync to Supabase)
+    // Preview cloud sync button
     el('sb-preview-star')?.addEventListener('click', async () => {
       if (!_previewItem) return;
-      try {
-        if (!_previewItem.starred) {
-          // Sync to Supabase snippets table
-          await DB.put('snippets', {
-            id:         _previewItem.id,
-            title:      _previewItem.title,
-            content:    _previewItem.content,
-            lang:       _previewItem.type,
-            tags:       _previewItem.tags,
-            pinned:     _previewItem.pinned,
-            created_at: _previewItem.createdAt,
-          });
-          _previewItem.starred = true;
-          toast('Đã lưu lên Supabase!', 'success');
+      const cloudBtn  = el('sb-preview-star');
+      const cloudText = el('sb-preview-star-text');
+
+      if (!_previewItem.starred) {
+        cloudBtn.disabled = true;
+        cloudText.textContent = 'Đang lưu...';
+        const ok = await syncItemToSupabase(_previewItem);
+        cloudBtn.disabled = false;
+        if (ok) {
+          toast('Đã lưu lên Supabase Cloud!', 'success');
+          cloudBtn.className = 'btn btn-sm btn-success text-white d-flex align-items-center gap-1';
+          cloudBtn.querySelector('i').className = 'bi bi-cloud-check-fill';
+          cloudText.textContent = 'Đã lưu Supabase';
         } else {
-          await DB.del('snippets', _previewItem.id);
-          _previewItem.starred = false;
-          toast('Đã xóa khỏi Supabase', 'success');
+          cloudText.textContent = 'Lưu Supabase';
         }
+      } else {
+        await deleteItemFromSupabase(_previewItem.id);
+        _previewItem.starred = false;
         await idbPut(_previewItem);
-        el('sb-preview-star').innerHTML = `<i class="bi bi-star${_previewItem.starred ? '-fill text-warning' : ''}"></i>`;
-        renderGrid();
-      } catch (err) {
-        toast('Lỗi đồng bộ Supabase: ' + err.message, 'error');
+        toast('Đã gỡ khỏi Supabase Cloud', 'info');
+        cloudBtn.className = 'btn btn-sm btn-secondary d-flex align-items-center gap-1';
+        cloudBtn.querySelector('i').className = 'bi bi-cloud-arrow-up';
+        cloudText.textContent = 'Lưu Supabase';
       }
+      renderGrid();
     });
 
     // Preview delete
     el('sb-preview-del')?.addEventListener('click', async () => {
       if (!_previewItem || !confirm('Xóa mục này?')) return;
       await idbDel(_previewItem.id);
+      await deleteItemFromSupabase(_previewItem.id);
       allItems = allItems.filter(i => i.id !== _previewItem.id);
       el('sb-preview-modal')?.classList.add('d-none');
       renderGrid();
       toast('Đã xóa', 'success');
     });
 
-    // Preview download
+    // Preview download / copy
     el('sb-preview-download')?.addEventListener('click', () => {
       if (!_previewItem) return;
       if (_previewItem.content.startsWith('data:') || _previewItem.content.startsWith('blob:')) {
@@ -585,6 +794,7 @@ const Scrapbook = (() => {
       if (tag && !_previewItem.tags.includes(tag)) {
         _previewItem.tags.push(tag);
         await idbPut(_previewItem);
+        if (_previewItem.starred) await syncItemToSupabase(_previewItem);
         renderPreviewTags(_previewItem);
       }
       if (el('sb-tag-input')) el('sb-tag-input').value = '';
@@ -597,15 +807,22 @@ const Scrapbook = (() => {
     el('sb-note-save')?.addEventListener('click', async () => {
       const title   = el('sb-note-title')?.value.trim();
       const content = el('sb-note-content')?.value.trim();
+      const syncCloud = el('sb-note-sync-supabase')?.checked;
+
       if (!content) { toast('Nhập nội dung!', 'warning'); return; }
       const tags = (el('sb-note-tags')?.value || '').split(/[,\s#]+/).filter(Boolean);
       const item = makeItem('note', { title: title || content.slice(0, 50), content, tags });
       await idbPut(item);
+
+      if (syncCloud) {
+        await syncItemToSupabase(item);
+      }
+
       allItems.unshift(item);
       el('sb-note-modal')?.classList.add('d-none');
       el('sb-note-title').value = el('sb-note-content').value = el('sb-note-tags').value = '';
       renderGrid();
-      toast('Đã lưu ghi chú!', 'success');
+      toast('Đã lưu ghi chú' + (syncCloud ? ' và đồng bộ Supabase!' : '!'), 'success');
     });
 
     // Add link
@@ -615,6 +832,8 @@ const Scrapbook = (() => {
     el('sb-link-save')?.addEventListener('click', async () => {
       const url   = el('sb-link-url')?.value.trim();
       const title = el('sb-link-title')?.value.trim();
+      const syncCloud = el('sb-link-sync-supabase')?.checked;
+
       if (!url) { toast('Nhập URL!', 'warning'); return; }
       const tags = (el('sb-link-tags')?.value || '').split(/[,\s#]+/).filter(Boolean);
       let finalTitle = title;
@@ -623,11 +842,16 @@ const Scrapbook = (() => {
       }
       const item = makeItem('link', { title: finalTitle, content: url, tags });
       await idbPut(item);
+
+      if (syncCloud) {
+        await syncItemToSupabase(item);
+      }
+
       allItems.unshift(item);
       el('sb-link-modal')?.classList.add('d-none');
       el('sb-link-url').value = el('sb-link-title').value = el('sb-link-tags').value = '';
       renderGrid();
-      toast('Đã lưu link!', 'success');
+      toast('Đã lưu link' + (syncCloud ? ' và đồng bộ Supabase!' : '!'), 'success');
     });
   }
 
@@ -656,11 +880,6 @@ const Scrapbook = (() => {
     }
     renderGrid();
     toast(`Đã lưu ${files.length} file!`, 'success');
-  }
-
-  function detectPasteType(text) {
-    if (/^https?:\/\//i.test(text)) return 'link';
-    return 'note';
   }
 
   return { render };

@@ -15,6 +15,7 @@ const App = (() => {
     Router.register('/settings',  renderSettings);
     Router.register('/scrapbook', Scrapbook.render);
     Router.register('/webopener', WebOpener.render);
+    Router.register('/tools',     Tools.render);
   }
 
   // ── Theme ─────────────────────────────
@@ -95,6 +96,7 @@ const App = (() => {
       '/settings':  'Cài đặt',
       '/scrapbook': 'Second Brain',
       '/webopener': 'Web Opener',
+      '/tools':     'Tiện ích Tools',
     };
     const titleEl = el('page-title');
     if (titleEl) titleEl.textContent = titles[path] || 'Personal OS';
@@ -110,6 +112,7 @@ const App = (() => {
     { label: 'Clipboard',      sub: 'Universal clipboard', icon: 'bi-clipboard2-pulse',  action: () => Router.navigate('/clipboard') },
     { label: 'Second Brain',   sub: 'Scrapbook & notes',   icon: 'bi-journal-bookmark',  action: () => Router.navigate('/scrapbook') },
     { label: 'Web Opener',     sub: 'Mở web trong cửa sổ', icon: 'bi-window',            action: () => Router.navigate('/webopener') },
+    { label: 'Tiện ích Tools', sub: 'Kích âm, OCR, PiP, PDF, QR', icon: 'bi-tools',     action: () => Router.navigate('/tools') },
     { label: 'Cài đặt',        sub: 'Settings',            icon: 'bi-gear',              action: () => Router.navigate('/settings') },
     { label: 'Dark Mode',      sub: 'Chuyển sang tối',     icon: 'bi-moon-stars-fill',   action: () => setTheme('dark') },
     { label: 'Light Mode',     sub: 'Chuyển sang sáng',    icon: 'bi-sun-fill',          action: () => setTheme('light') },

@@ -1,5 +1,5 @@
 /* Personal OS — Service Worker (minimal, cache-first for shell) */
-const CACHE = 'personal-os-v2';
+const CACHE = 'personal-os-v3';
 const SHELL = [
   './',
   './index.html',
@@ -20,6 +20,7 @@ const SHELL = [
   './js/modules/settings.js',
   './js/modules/scrapbook.js',
   './js/modules/webopener.js',
+  './js/modules/tools.js',
 ];
 
 self.addEventListener('install', e => {

@@ -2,13 +2,15 @@
 <html lang="vi" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="description" content="Personal OS — Dashboard, Timesheet, Chi tiêu, Bookmarks, Second Brain, Web Opener." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="description" content="Personal OS — Dashboard, Timesheet, Chi tiêu, Bookmarks, Second Brain, Web Opener, Power Tools." />
   <meta name="theme-color" content="#0d1117" />
   <title>Personal OS</title>
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.webmanifest" />
+  <!-- PWA & Favicon -->
+  <link rel="icon" type="image/x-icon" href="./favicon.ico" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <link rel="manifest" href="./manifest.webmanifest" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -20,10 +22,10 @@
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="css/tokens.css" />
-  <link rel="stylesheet" href="css/layout.css" />
-  <link rel="stylesheet" href="css/components.css" />
+  <!-- Custom CSS with cache buster -->
+  <link rel="stylesheet" href="./css/tokens.css?v=4" />
+  <link rel="stylesheet" href="./css/layout.css?v=4" />
+  <link rel="stylesheet" href="./css/components.css?v=4" />
 </head>
 <body>
 
@@ -195,26 +197,26 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
   <!-- Core -->
-  <script src="js/supabase-client.js"></script>
-  <script src="js/utils.js"></script>
-  <script src="js/lunar.js"></script>
-  <script src="js/auth.js"></script>
+  <script src="./js/supabase-client.js?v=4"></script>
+  <script src="./js/utils.js?v=4"></script>
+  <script src="./js/lunar.js?v=4"></script>
+  <script src="./js/auth.js?v=4"></script>
 
   <!-- Modules -->
-  <script src="js/modules/dashboard.js"></script>
-  <script src="js/modules/timesheet.js"></script>
-  <script src="js/modules/expenses.js"></script>
-  <script src="js/modules/bookmarks.js"></script>
-  <script src="js/modules/vault.js"></script>
-  <script src="js/modules/clipboard.js"></script>
-  <script src="js/modules/settings.js"></script>
-  <script src="js/modules/scrapbook.js"></script>
-  <script src="js/modules/webopener.js"></script>
-  <script src="js/modules/tools.js"></script>
+  <script src="./js/modules/dashboard.js?v=4"></script>
+  <script src="./js/modules/timesheet.js?v=4"></script>
+  <script src="./js/modules/expenses.js?v=4"></script>
+  <script src="./js/modules/bookmarks.js?v=4"></script>
+  <script src="./js/modules/vault.js?v=4"></script>
+  <script src="./js/modules/clipboard.js?v=4"></script>
+  <script src="./js/modules/settings.js?v=4"></script>
+  <script src="./js/modules/scrapbook.js?v=4"></script>
+  <script src="./js/modules/webopener.js?v=4"></script>
+  <script src="./js/modules/tools.js?v=4"></script>
 
   <!-- Router + Main + Bootstrap -->
-  <script src="js/router.js"></script>
-  <script src="js/main.js"></script>
+  <script src="./js/router.js?v=4"></script>
+  <script src="./js/main.js?v=4"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Service Worker (PWA) -->

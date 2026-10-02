@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Personal OS — HTML/CSS/JS (no build step)
 
-## Getting Started
+## Chạy local
+Chỉ cần mở file `index.html` trên trình duyệt.
 
-First, run the development server:
+**Cách tốt nhất** — dùng extension "Live Server" trong VS Code (click chuột phải → Open with Live Server).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+> **Lưu ý:** Service Worker (PWA offline) chỉ hoạt động khi chạy qua HTTP server, không hoạt động khi mở file `file://` trực tiếp.
+
+## Cấu trúc file
+```
+index.html              ← Shell SPA duy nhất
+manifest.webmanifest    ← PWA config
+sw.js                   ← Service Worker (offline)
+css/
+  tokens.css            ← Design tokens (màu sắc, spacing, radius)
+  layout.css            ← Sidebar, topbar, auth gate
+  components.css        ← Cards, buttons, tables, forms...
+js/
+  db.js                 ← IndexedDB wrapper (tất cả stores)
+  utils.js              ← Time, money, DOM, toast, CSV/JSON export
+  auth.js               ← PIN lock screen (mặc định: 1234)
+  router.js             ← Hash-based SPA router (#/dashboard)
+  main.js               ← App bootstrap, command palette (Ctrl+K)
+  modules/
+    dashboard.js        ← Trang chủ, check-in live timer, thống kê
+    timesheet.js        ← Check-in/out, worklog, OT calc, export CSV
+    expenses.js         ← Nhập nhanh "cafe 35k", ngân sách, alert
+    bookmarks.js        ← OG fetch, SSRF guard, search, status
+    vault.js            ← Snippets, pin, search, copy 1-click
+    clipboard.js        ← Auto-detect link/text, pin, auto-expire
+    settings.js         ← PIN, OT rules, backup JSON, theme
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tính năng
+| Module | Tính năng chính |
+|--------|----------------|
+| Dashboard | Check-in/out, live timer, stats, recent activity |
+| Timesheet | Phiên làm việc, worklog Markdown, OT tính tự động, export CSV |
+| Chi tiêu | Nhập "cafe 35k", danh mục, ngân sách 80%/100% alert, export CSV |
+| Bookmarks | Tự lấy OG title, SSRF guard, filter status/category, full search |
+| Dev Vault | Snippets, pin, language filter, copy 1-click, inline edit |
+| Clipboard | Text/link auto-detect, pin, Ctrl+Enter, auto-expire |
+| Settings | Đổi PIN, OT rules, backup/restore JSON, xóa toàn bộ |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Shortcuts
+- `Ctrl+K` — Mở Command Palette
+- `Ctrl+Enter` — Thêm nhanh (trong Clipboard)
+- PIN mặc định: **1234** (đổi trong Settings)

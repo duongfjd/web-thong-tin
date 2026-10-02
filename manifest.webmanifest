@@ -1,0 +1,29 @@
+{
+  "name": "Personal OS",
+  "short_name": "PersonalOS",
+  "description": "Hệ điều hành cá nhân: timesheet, chi tiêu, bookmark, clipboard, snippets.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "share_target": {
+    "action": "#/clipboard",
+    "method": "GET",
+    "params": {
+      "text": "text",
+      "url": "url"
+    }
+  }
+}

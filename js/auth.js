@@ -1,209 +1,180 @@
 /* ================================================================
-   auth.js — Two-layer auth:
-   Layer 1: Supabase Auth (email + password) — controls data access
-   Layer 2: PIN screen lock (local, just hides UI on inactivity)
+   auth.js — Supabase Auth (Sign In / Sign Up) + Offline/Guest Mode
    ================================================================ */
 
 const Auth = (() => {
-  let _unlocked = false;
-  let _user     = null;
-  let _lockTimer = null;
-  const LOCK_AFTER_MS = 15 * 60 * 1000; // 15 min inactivity
+  let _user = null;
+  let _mode = 'login'; // 'login' | 'signup'
 
-  // ── PIN helpers ───────────────────────
-  function hashPin(pin) {
-    let h = 0;
-    for (let i = 0; i < pin.length; i++) h = (Math.imul(31, h) + pin.charCodeAt(i)) | 0;
-    return String(h);
-  }
-
-  async function getStoredHash() {
-    // Stored in localStorage (device-local, not synced)
-    return localStorage.getItem('pos_pin_hash') || hashPin('1234');
-  }
-
-  async function verifyPin(pin) {
-    const stored = await getStoredHash();
-    return hashPin(pin) === stored;
-  }
-
-  async function setPin(newPin) {
-    localStorage.setItem('pos_pin_hash', hashPin(newPin));
-  }
-
-  // ── Screen lock / unlock ──────────────
-  function showPinScreen() {
-    hide('login-screen');
-    show('pin-screen');
-    hide('app-shell');
-    requestAnimationFrame(() => el('pin0')?.focus());
-  }
+  function getUser() { return _user; }
 
   function showLoginScreen() {
-    show('login-screen');
-    hide('pin-screen');
+    const gate = el('auth-gate');
+    if (gate) gate.classList.remove('d-none');
     hide('app-shell');
   }
 
-  function unlockApp() {
-    _unlocked = true;
+  function enterApp() {
     hide('auth-gate');
     show('app-shell');
-    resetLockTimer();
+    App.init();
   }
 
-  function lock() {
-    _unlocked = false;
-    clearTimeout(_lockTimer);
-    show('auth-gate');
-    showPinScreen();
-    hide('app-shell');
+  function setupTabs() {
+    const tabLogin  = el('auth-tab-login');
+    const tabSignup = el('auth-tab-signup');
+    const submitTxt = el('auth-submit-text');
+    const errEl     = el('login-error');
+    const succEl    = el('login-success');
+
+    tabLogin?.addEventListener('click', () => {
+      _mode = 'login';
+      tabLogin.classList.remove('text-muted');
+      tabLogin.classList.add('fw-semibold');
+      tabLogin.style.background = 'var(--clr-surface-3)';
+      tabLogin.style.color = 'var(--clr-text)';
+
+      tabSignup.classList.add('text-muted');
+      tabSignup.classList.remove('fw-semibold');
+      tabSignup.style.background = 'transparent';
+      tabSignup.style.color = '';
+
+      if (submitTxt) submitTxt.textContent = 'Đăng nhập';
+      if (errEl) errEl.classList.add('d-none');
+      if (succEl) succEl.classList.add('d-none');
+    });
+
+    tabSignup?.addEventListener('click', () => {
+      _mode = 'signup';
+      tabSignup.classList.remove('text-muted');
+      tabSignup.classList.add('fw-semibold');
+      tabSignup.style.background = 'var(--clr-surface-3)';
+      tabSignup.style.color = 'var(--clr-text)';
+
+      tabLogin.classList.add('text-muted');
+      tabLogin.classList.remove('fw-semibold');
+      tabLogin.style.background = 'transparent';
+      tabLogin.style.color = '';
+
+      if (submitTxt) submitTxt.textContent = 'Tạo tài khoản mới';
+      if (errEl) errEl.classList.add('d-none');
+      if (succEl) succEl.classList.add('d-none');
+    });
+
+    // Guest / Offline mode
+    el('guest-btn')?.addEventListener('click', () => {
+      _user = { email: 'Khách (Lưu trên máy)', id: 'local_user' };
+      localStorage.setItem('pos_guest_mode', 'true');
+      enterApp();
+    });
   }
 
-  function resetLockTimer() {
-    clearTimeout(_lockTimer);
-    _lockTimer = setTimeout(lock, LOCK_AFTER_MS);
-  }
-
-  function isUnlocked() { return _unlocked; }
-  function getUser()    { return _user; }
-
-  // ── Supabase login form ───────────────
+  // ── Form submit ─────────────────────────────────────────────────
   function setupLoginForm() {
-    const form     = el('login-form');
-    const emailEl  = el('login-email');
-    const passEl   = el('login-password');
-    const errorEl  = el('login-error');
-    const loadEl   = el('login-loading');
+    const form      = el('login-form');
+    const emailEl   = el('login-email');
+    const passEl    = el('login-password');
+    const errorEl   = el('login-error');
+    const successEl = el('login-success');
+    const loadEl    = el('login-loading');
+    const submitBtn = el('auth-submit-btn');
 
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = emailEl?.value.trim();
       const pass  = passEl?.value;
-
       if (!email || !pass) return;
 
-      if (errorEl) errorEl.classList.add('d-none');
-      if (loadEl)  loadEl.classList.remove('d-none');
-      form.querySelector('button[type=submit]').disabled = true;
+      if (errorEl)   errorEl.classList.add('d-none');
+      if (successEl) successEl.classList.add('d-none');
+      if (loadEl)    loadEl.classList.remove('d-none');
+      if (submitBtn) submitBtn.disabled = true;
 
-      const { data, error } = await SB.auth.signInWithPassword({ email, password: pass });
+      try {
+        if (_mode === 'login') {
+          const { data, error } = await SB.auth.signInWithPassword({ email, password: pass });
+          if (error) throw error;
+          localStorage.removeItem('pos_guest_mode');
+          _user = data.user;
+          enterApp();
+        } else {
+          // Sign Up
+          const { data, error } = await SB.auth.signUp({ email, password: pass });
+          if (error) throw error;
 
-      if (loadEl)  loadEl.classList.add('d-none');
-      form.querySelector('button[type=submit]').disabled = false;
-
-      if (error) {
+          if (data.session) {
+            localStorage.removeItem('pos_guest_mode');
+            _user = data.user;
+            enterApp();
+          } else {
+            if (successEl) {
+              successEl.textContent = 'Đăng ký thành công! Hãy kiểm tra email để xác nhận (hoặc đăng nhập nếu email auto-confirm).';
+              successEl.classList.remove('d-none');
+            }
+          }
+        }
+      } catch (err) {
         if (errorEl) {
-          errorEl.textContent = 'Sai email hoặc mật khẩu.';
+          errorEl.textContent = err.message || 'Đã xảy ra lỗi. Vui lòng thử lại.';
           errorEl.classList.remove('d-none');
         }
-        return;
-      }
-
-      _user = data.user;
-      showPinScreen();
-    });
-  }
-
-  // ── PIN form ──────────────────────────
-  function setupPinForm() {
-    const form   = el('pin-form');
-    const errorEl = el('pin-error');
-    const digits  = [el('pin0'), el('pin1'), el('pin2'), el('pin3')];
-
-    digits.forEach((d, i) => {
-      if (!d) return;
-      d.addEventListener('input', () => {
-        d.value = d.value.replace(/\D/, '');
-        if (d.value && i < 3) digits[i + 1]?.focus();
-        if (d.value && i === 3) form?.dispatchEvent(new Event('submit'));
-      });
-      d.addEventListener('keydown', (e) => {
-        if (e.key === 'Backspace' && !d.value && i > 0) {
-          digits[i - 1].focus();
-          digits[i - 1].value = '';
-        }
-      });
-    });
-
-    form?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const pin = digits.map(d => d?.value || '').join('');
-      if (pin.length < 4) return;
-
-      const ok = await verifyPin(pin);
-      if (ok) {
-        errorEl?.classList.add('d-none');
-        digits.forEach(d => { if (d) d.value = ''; });
-        hide('auth-gate');
-        unlockApp();
-        App.init();
-      } else {
-        errorEl?.classList.remove('d-none');
-        digits.forEach(d => { if (d) d.value = ''; });
-        digits[0]?.focus();
-        const card = qs('.auth-card');
-        if (card) { card.style.animation = 'none'; setTimeout(() => { card.style.animation = 'shake .3s ease'; }, 10); }
+      } finally {
+        if (loadEl)  loadEl.classList.add('d-none');
+        if (submitBtn) submitBtn.disabled = false;
       }
     });
-
-    // Logout from Supabase
-    el('logout-btn')?.addEventListener('click', async () => {
-      await SB.auth.signOut();
-      _user = null;
-      _unlocked = false;
-      digits.forEach(d => { if (d) d.value = ''; });
-      showLoginScreen();
-    });
   }
 
-  function setupInactivityTracking() {
-    ['mousemove', 'keydown', 'click', 'touchstart'].forEach(evt => {
-      document.addEventListener(evt, () => { if (_unlocked) resetLockTimer(); }, { passive: true });
-    });
-  }
-
-  // ── Main init ─────────────────────────
   async function init() {
-    await DB.open();
+    setupTabs();
+    setupLoginForm();
 
-    // Check for existing Supabase session
-    const { data: { session } } = await SB.auth.getSession();
+    try {
+      await DB.open();
+    } catch (e) {
+      console.warn('DB.open error, continuing in local mode', e);
+    }
 
-    show('auth-gate');
-    hide('app-shell');
+    // Check if guest mode was active
+    if (localStorage.getItem('pos_guest_mode') === 'true') {
+      _user = { email: 'Khách (Lưu trên máy)', id: 'local_user' };
+      enterApp();
+      return;
+    }
 
-    if (session) {
-      _user = session.user;
-      showPinScreen();
-    } else {
+    try {
+      const { data: { session } } = await SB.auth.getSession();
+      if (session) {
+        _user = session.user;
+        enterApp();
+      } else {
+        showLoginScreen();
+      }
+    } catch {
       showLoginScreen();
     }
 
-    setupLoginForm();
-    setupPinForm();
-    setupInactivityTracking();
-
-    // Listen for auth state changes
     SB.auth.onAuthStateChange((event, sess) => {
       if (event === 'SIGNED_OUT') {
         _user = null;
-        _unlocked = false;
-        show('auth-gate');
+        localStorage.removeItem('pos_guest_mode');
         showLoginScreen();
-        hide('app-shell');
+      }
+      if (event === 'SIGNED_IN' && sess) {
+        _user = sess.user;
+        localStorage.removeItem('pos_guest_mode');
       }
     });
   }
 
-  return { init, lock, unlock: unlockApp, setPin, isUnlocked, getUser, resetLockTimer };
-})();
-
-// Shake animation
-const _shakeStyle = document.createElement('style');
-_shakeStyle.textContent = `
-  @keyframes shake {
-    0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 60%{transform:translateX(8px)} 80%{transform:translateX(-4px)}
+  async function signOut() {
+    try {
+      await SB.auth.signOut();
+    } catch {}
+    localStorage.removeItem('pos_guest_mode');
+    _user = null;
+    showLoginScreen();
   }
-`;
-document.head.appendChild(_shakeStyle);
+
+  return { init, signOut, getUser };
+})();

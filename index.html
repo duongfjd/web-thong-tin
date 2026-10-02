@@ -2,13 +2,16 @@
 <html lang="vi" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Personal OS — Trợ lý cá nhân: timesheet, chi tiêu, bookmark, clipboard, snippets." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Personal OS — Dashboard, Timesheet, Chi tiêu, Bookmarks, Second Brain, Web Opener." />
+  <meta name="theme-color" content="#0d1117" />
   <title>Personal OS</title>
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.webmanifest" />
-  <meta name="theme-color" content="#0d1117" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
   <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -25,69 +28,45 @@
 <body>
 
   <!-- ════════════════════════════════
-       AUTH GATE (wrapper — always visible until inside app)
+       AUTH GATE
   ═══════════════════════════════════ -->
-  <div id="auth-gate" class="auth-gate d-none">
-
-    <!-- ── Screen 1: Supabase Login ── -->
-    <div id="login-screen" class="d-none">
-      <div class="auth-card">
-        <div class="text-center mb-4">
-          <div class="auth-logo">
-            <i class="bi bi-layers-fill"></i>
-          </div>
-          <h1 class="fs-3 fw-bold mt-3">Personal OS</h1>
-          <p class="text-muted small">Đăng nhập để tiếp tục</p>
+  <div id="auth-gate" class="auth-gate">
+    <div class="auth-card">
+      <div class="text-center mb-4">
+        <div class="auth-logo">
+          <i class="bi bi-layers-fill"></i>
         </div>
-        <form id="login-form" autocomplete="on">
-          <div id="login-error" class="alert alert-danger py-2 small mb-3 d-none" role="alert"></div>
-          <div class="form-group">
-            <label class="form-label" for="login-email">Email</label>
-            <input id="login-email" type="email" class="form-ctrl" placeholder="you@example.com" autocomplete="email" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="login-password">Mật khẩu</label>
-            <input id="login-password" type="password" class="form-ctrl" placeholder="••••••••" autocomplete="current-password" required />
-          </div>
-          <button type="submit" class="btn-primary w-100 justify-content-center mt-2">
-            <span id="login-loading" class="spinner-border spinner-border-sm me-2 d-none" role="status"></span>
-            Đăng nhập
-          </button>
-        </form>
+        <h1 class="fs-4 fw-bold mt-3">Personal OS</h1>
+        <p class="text-muted small mt-1">Đăng nhập để tiếp tục</p>
+      </div>
+      <div class="d-flex mb-3 p-1 rounded" style="background:var(--clr-surface-2)">
+        <button type="button" class="btn btn-sm flex-1 fw-semibold" id="auth-tab-login" style="background:var(--clr-surface-3);color:var(--clr-text)">Đăng nhập</button>
+        <button type="button" class="btn btn-sm flex-1 text-muted" id="auth-tab-signup">Đăng ký</button>
+      </div>
+
+      <form id="login-form" autocomplete="on">
+        <div id="login-error" class="alert alert-danger py-2 small mb-3 d-none" role="alert"></div>
+        <div id="login-success" class="alert alert-success py-2 small mb-3 d-none" role="alert"></div>
+        <div class="form-group">
+          <label class="form-label" for="login-email">Email</label>
+          <input id="login-email" type="email" class="form-ctrl" placeholder="you@example.com" autocomplete="email" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-password">Mật khẩu</label>
+          <input id="login-password" type="password" class="form-ctrl" placeholder="••••••••" autocomplete="current-password" required />
+        </div>
+        <button type="submit" id="auth-submit-btn" class="btn-primary w-100 justify-content-center mt-2" style="display:flex">
+          <span id="login-loading" class="spinner-border spinner-border-sm me-2 d-none" role="status"></span>
+          <span id="auth-submit-text">Đăng nhập</span>
+        </button>
+      </form>
+
+      <div class="text-center mt-3 pt-3 border-top" style="border-color:var(--clr-border) !important">
+        <button type="button" id="guest-btn" class="btn btn-sm btn-link text-muted text-decoration-none">
+          <i class="bi bi-person-check me-1"></i>Dùng ngay không cần tài khoản (Lưu trên máy)
+        </button>
       </div>
     </div>
-
-    <!-- ── Screen 2: PIN Lock ── -->
-    <div id="pin-screen" class="d-none">
-      <div class="auth-card">
-        <div class="text-center mb-4">
-          <div class="auth-logo">
-            <i class="bi bi-shield-lock-fill"></i>
-          </div>
-          <h1 class="fs-3 fw-bold mt-3">Xác nhận PIN</h1>
-          <p class="text-muted small">Nhập mã PIN để mở khoá</p>
-        </div>
-        <form id="pin-form" autocomplete="off">
-          <div class="pin-inputs mb-4">
-            <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" id="pin0" />
-            <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" id="pin1" />
-            <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" id="pin2" />
-            <input class="pin-digit" type="password" inputmode="numeric" maxlength="1" id="pin3" />
-          </div>
-          <div id="pin-error" class="text-danger text-center small mb-3 d-none">Mã PIN không đúng. Thử lại.</div>
-          <button type="submit" class="btn-primary w-100 justify-content-center">Mở khóa</button>
-          <div class="text-center mt-3">
-            <button type="button" id="logout-btn" class="btn-ghost btn-sm text-muted">
-              <i class="bi bi-box-arrow-left me-1"></i> Đăng xuất tài khoản khác
-            </button>
-          </div>
-          <div class="text-center mt-2">
-            <span class="text-muted small">PIN mặc định: <strong>1234</strong> — đổi trong Cài đặt</span>
-          </div>
-        </form>
-      </div>
-    </div>
-
   </div>
 
   <!-- ════════════════════════════════
@@ -95,73 +74,74 @@
   ═══════════════════════════════════ -->
   <div id="app-shell" class="app-shell d-none">
 
-    <!-- Sidebar -->
+    <!-- Sidebar (desktop) -->
     <nav id="sidebar" class="sidebar">
       <div class="sidebar-header">
         <span class="sidebar-brand">
           <i class="bi bi-layers-fill text-primary"></i>
           Personal OS
         </span>
-        <button id="sidebar-close" class="btn-icon d-lg-none"><i class="bi bi-x-lg"></i></button>
+        <button id="sidebar-close" class="btn-icon d-md-none"><i class="bi bi-x-lg"></i></button>
       </div>
 
       <ul class="sidebar-nav">
         <li class="nav-section-label">Menu</li>
-        <li><a class="sidebar-link" href="#/dashboard"><i class="bi bi-grid-1x2"></i> Dashboard</a></li>
-        <li><a class="sidebar-link" href="#/timesheet"><i class="bi bi-clock-history"></i> Timesheet</a></li>
-        <li><a class="sidebar-link" href="#/expenses"><i class="bi bi-wallet2"></i> Chi tiêu</a></li>
-        <li><a class="sidebar-link" href="#/bookmarks"><i class="bi bi-bookmark-star"></i> Bookmarks</a></li>
-        <li><a class="sidebar-link" href="#/vault"><i class="bi bi-code-square"></i> Dev Vault</a></li>
-        <li><a class="sidebar-link" href="#/clipboard"><i class="bi bi-clipboard2-pulse"></i> Clipboard</a></li>
+        <li><a class="sidebar-link" href="#/dashboard" id="nav-dashboard"><i class="bi bi-grid-1x2"></i> Dashboard</a></li>
+        <li><a class="sidebar-link" href="#/timesheet" id="nav-timesheet"><i class="bi bi-table"></i> Timesheet</a></li>
+        <li><a class="sidebar-link" href="#/expenses"  id="nav-expenses"><i class="bi bi-wallet2"></i> Chi tiêu</a></li>
+        <li><a class="sidebar-link" href="#/bookmarks" id="nav-bookmarks"><i class="bi bi-bookmark-star"></i> Bookmarks</a></li>
+        <li><a class="sidebar-link" href="#/vault"     id="nav-vault"><i class="bi bi-code-square"></i> Dev Vault</a></li>
+        <li><a class="sidebar-link" href="#/clipboard" id="nav-clipboard"><i class="bi bi-clipboard2-pulse"></i> Clipboard</a></li>
+        <li><a class="sidebar-link" href="#/scrapbook" id="nav-scrapbook"><i class="bi bi-journal-bookmark"></i> Second Brain</a></li>
+        <li><a class="sidebar-link" href="#/webopener" id="nav-webopener"><i class="bi bi-window"></i> Web Opener</a></li>
 
         <li class="nav-section-label mt-3">Hệ thống</li>
-        <li><a class="sidebar-link" href="#/settings"><i class="bi bi-gear"></i> Cài đặt</a></li>
+        <li><a class="sidebar-link" href="#/settings"  id="nav-settings"><i class="bi bi-gear"></i> Cài đặt</a></li>
       </ul>
 
       <div class="sidebar-footer">
-        <div class="d-flex flex-column gap-1 w-100">
-          <!-- User info -->
-          <div id="sidebar-user" class="d-flex align-items-center gap-2 px-1 py-1">
-            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center flex-shrink-0"
-                 style="width:28px;height:28px;font-size:12px;color:#fff">
-              <i class="bi bi-person-fill"></i>
-            </div>
-            <span id="sidebar-email" class="text-muted small text-truncate" style="max-width:140px">—</span>
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center flex-shrink-0"
+               style="width:28px;height:28px;font-size:12px;color:#fff">
+            <i class="bi bi-person-fill"></i>
           </div>
-          <div class="d-flex gap-1">
-            <button id="theme-toggle" class="btn-icon flex-1" title="Chuyển theme">
-              <i class="bi bi-moon-stars-fill"></i>
-            </button>
-            <button id="lock-btn" class="btn-icon flex-1" title="Khoá màn hình">
-              <i class="bi bi-lock"></i>
-            </button>
-            <button id="signout-btn" class="btn-icon flex-1" title="Đăng xuất">
-              <i class="bi bi-box-arrow-right"></i>
-            </button>
-          </div>
+          <span id="sidebar-email" class="text-muted small truncate" style="max-width:140px">—</span>
+        </div>
+        <div class="d-flex gap-1">
+          <button id="theme-toggle" class="btn-icon flex-1" title="Chuyển theme">
+            <i class="bi bi-moon-stars-fill"></i>
+          </button>
+          <button id="signout-btn" class="btn-icon flex-1" title="Đăng xuất">
+            <i class="bi bi-box-arrow-right"></i>
+          </button>
         </div>
       </div>
     </nav>
 
     <!-- Sidebar Overlay (mobile) -->
-    <div id="sidebar-overlay" class="sidebar-overlay d-lg-none"></div>
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
     <!-- Main -->
     <div class="main-wrapper">
       <!-- Top Bar -->
       <header class="topbar">
-        <button id="sidebar-toggle" class="btn-icon me-2 d-lg-none">
+        <button id="sidebar-toggle" class="btn-icon me-1 d-md-none">
           <i class="bi bi-list fs-5"></i>
         </button>
         <div id="page-title" class="topbar-title">Dashboard</div>
         <div class="topbar-actions ms-auto">
-          <button id="cmd-btn" class="btn btn-sm btn-outline-secondary d-none d-md-flex align-items-center gap-2" title="Ctrl+K">
+          <!-- Ctrl+K search button -->
+          <button id="cmd-btn" class="btn btn-sm btn-outline-secondary d-none d-md-flex align-items-center gap-2" title="Ctrl+K" style="border-color:var(--clr-border);color:var(--clr-muted);background:var(--clr-surface-2);font-size:12px;padding:5px 10px">
             <i class="bi bi-search"></i>
-            <span class="text-muted">Tìm kiếm...</span>
+            <span>Tìm kiếm...</span>
             <kbd class="kbd">Ctrl K</kbd>
           </button>
           <button id="cmd-btn-mobile" class="btn-icon d-md-none">
             <i class="bi bi-search"></i>
+          </button>
+          <!-- Web opener quick button -->
+          <button id="topbar-web-btn" class="btn-icon" title="Web Opener" onclick="Router.navigate('/webopener')">
+            <i class="bi bi-window"></i>
           </button>
         </div>
       </header>
@@ -173,6 +153,17 @@
         </div>
       </main>
     </div>
+
+    <!-- ── Bottom Nav (mobile) ── -->
+    <nav class="bottom-nav">
+      <div class="bottom-nav-inner">
+        <a class="bottom-nav-item" href="#/dashboard"><i class="bi bi-grid-1x2"></i><span>Home</span></a>
+        <a class="bottom-nav-item" href="#/timesheet"><i class="bi bi-table"></i><span>Sheet</span></a>
+        <a class="bottom-nav-item" href="#/expenses"><i class="bi bi-wallet2"></i><span>Chi tiêu</span></a>
+        <a class="bottom-nav-item" href="#/scrapbook"><i class="bi bi-journal-bookmark"></i><span>Brain</span></a>
+        <a class="bottom-nav-item" href="#/webopener"><i class="bi bi-window"></i><span>Web</span></a>
+      </div>
+    </nav>
   </div>
 
   <!-- ════════════════════════════════
@@ -193,11 +184,10 @@
   <!-- ════════════════════════════════
        TOAST CONTAINER
   ═══════════════════════════════════ -->
-  <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+  <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:9999"></div>
 
   <!-- ════════════════════════════════
        SCRIPTS
-       Order: Supabase CDN → client wrapper → utils → auth → modules → router → main → bootstrap
   ═══════════════════════════════════ -->
 
   <!-- Supabase JS v2 CDN -->
@@ -216,8 +206,10 @@
   <script src="js/modules/vault.js"></script>
   <script src="js/modules/clipboard.js"></script>
   <script src="js/modules/settings.js"></script>
+  <script src="js/modules/scrapbook.js"></script>
+  <script src="js/modules/webopener.js"></script>
 
-  <!-- Router + Bootstrap -->
+  <!-- Router + Main + Bootstrap -->
   <script src="js/router.js"></script>
   <script src="js/main.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

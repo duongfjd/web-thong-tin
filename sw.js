@@ -1,12 +1,12 @@
 /* Personal OS — Service Worker (minimal, cache-first for shell) */
-const CACHE = 'personal-os-v1';
+const CACHE = 'personal-os-v2';
 const SHELL = [
   './',
   './index.html',
   './css/tokens.css',
   './css/layout.css',
   './css/components.css',
-  './js/db.js',
+  './js/supabase-client.js',
   './js/utils.js',
   './js/auth.js',
   './js/router.js',
@@ -18,6 +18,8 @@ const SHELL = [
   './js/modules/vault.js',
   './js/modules/clipboard.js',
   './js/modules/settings.js',
+  './js/modules/scrapbook.js',
+  './js/modules/webopener.js',
 ];
 
 self.addEventListener('install', e => {

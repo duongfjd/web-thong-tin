@@ -1,33 +1,43 @@
 /* ================================================================
-   DESIGN TOKENS — Personal OS
+   DESIGN TOKENS — Personal OS v2
    ================================================================ */
 :root {
   /* Color palette */
   --clr-bg:          #0d1117;
   --clr-surface:     #161b22;
   --clr-surface-2:   #21262d;
+  --clr-surface-3:   #2d333b;
   --clr-border:      #30363d;
+  --clr-border-2:    #21262d;
   --clr-text:        #e6edf3;
   --clr-muted:       #8b949e;
+  --clr-muted-2:     #6e7681;
   --clr-primary:     #2f81f7;
   --clr-primary-dim: rgba(47, 129, 247, 0.15);
+  --clr-primary-hover: #388bfd;
   --clr-success:     #3fb950;
-  --clr-success-dim: rgba(63, 185, 80, 0.15);
+  --clr-success-dim: rgba(63, 185, 80, 0.12);
   --clr-danger:      #f85149;
-  --clr-danger-dim:  rgba(248, 81, 73, 0.15);
+  --clr-danger-dim:  rgba(248, 81, 73, 0.12);
   --clr-warning:     #d29922;
-  --clr-warning-dim: rgba(210, 153, 34, 0.15);
+  --clr-warning-dim: rgba(210, 153, 34, 0.12);
   --clr-purple:      #bc8cff;
-  --clr-purple-dim:  rgba(188, 140, 255, 0.15);
+  --clr-purple-dim:  rgba(188, 140, 255, 0.12);
   --clr-orange:      #f0883e;
-  --clr-orange-dim:  rgba(240, 136, 62, 0.15);
+  --clr-orange-dim:  rgba(240, 136, 62, 0.12);
+  --clr-teal:        #39d0d8;
+  --clr-teal-dim:    rgba(57, 208, 216, 0.12);
 
   /* Sidebar */
-  --sidebar-width: 240px;
-  --sidebar-bg:    #0d1117;
+  --sidebar-width:    240px;
+  --sidebar-bg:       #0d1117;
+  --sidebar-mini:     56px;
 
   /* Topbar */
-  --topbar-h: 56px;
+  --topbar-h: 52px;
+
+  /* Bottom nav (mobile) */
+  --bottom-nav-h: 56px;
 
   /* Spacing */
   --sp-xs: 4px;
@@ -37,45 +47,75 @@
   --sp-xl: 32px;
 
   /* Radius */
+  --r-xs:  4px;
   --r-sm:  6px;
   --r-md:  10px;
   --r-lg:  16px;
+  --r-xl:  20px;
   --r-full: 9999px;
 
   /* Transitions */
-  --ease: 0.18s ease;
+  --ease:      0.18s ease;
+  --ease-slow: 0.3s ease;
 
   /* Shadow */
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.4);
-  --shadow-md: 0 4px 16px rgba(0,0,0,.5);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.35);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.45);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,.55);
+  --shadow-xl: 0 16px 48px rgba(0,0,0,.65);
+
+  /* Grid (spreadsheet) */
+  --cell-h: 34px;
+  --cell-border: 1px solid var(--clr-border);
 }
 
 [data-theme="light"] {
   --clr-bg:          #f6f8fa;
   --clr-surface:     #ffffff;
   --clr-surface-2:   #f0f2f4;
+  --clr-surface-3:   #e8eaed;
   --clr-border:      #d0d7de;
+  --clr-border-2:    #e8eaed;
   --clr-text:        #1f2328;
   --clr-muted:       #656d76;
+  --clr-muted-2:     #8b949e;
+  --clr-primary-dim: rgba(47, 129, 247, 0.1);
   --sidebar-bg:      #1b1f26;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.1);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.15);
 }
 
-/* ── Base ────────────────────────────── */
+/* ── Reset & Base ─────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-size: 14px;
+  line-height: 1.5;
   background: var(--clr-bg);
   color: var(--clr-text);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
 }
 
 a { color: var(--clr-primary); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-/* Override Bootstrap colors for dark theme */
 .text-muted { color: var(--clr-muted) !important; }
+.text-primary { color: var(--clr-primary) !important; }
+.text-success { color: var(--clr-success) !important; }
+.text-danger  { color: var(--clr-danger) !important; }
+.text-warning { color: var(--clr-warning) !important; }
+.text-purple  { color: var(--clr-purple) !important; }
+.text-orange  { color: var(--clr-orange) !important; }
+.text-teal    { color: var(--clr-teal) !important; }
+
+/* ── Utility ─────────────────────────── */
+.flex-1 { flex: 1; }
+.gap-1  { gap: var(--sp-xs); }
+.gap-2  { gap: var(--sp-sm); }
+.gap-3  { gap: var(--sp-md); }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

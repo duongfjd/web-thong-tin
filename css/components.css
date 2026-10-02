@@ -850,6 +850,8 @@ kbd.kbd {
 /* ══ RESPONSIVE TWEAKS ══════════════════════════════════════════ */
 @media (max-width: 767px) {
   .scrap-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: var(--sp-sm); }
+  .scrap-card .scrap-card-actions { opacity: 1 !important; }
+  .drop-zone { padding: var(--sp-md) var(--sp-sm); }
   .page-header { margin-bottom: var(--sp-md); }
   .page-header h2 { font-size: 17px; }
   .stat-value { font-size: 18px; }

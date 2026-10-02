@@ -2,10 +2,12 @@
    modules/scrapbook.js — Second Brain / Omni-Scrapbook
    Storage: IndexedDB (files/blobs) + Supabase Cloud Sync
    Features:
+   - Mobile-first file upload (Photos, Camera, Documents, PDFs)
+   - Auto-compression for high-res mobile photos (< 400KB)
    - Paste (Ctrl+V): image, link, text auto-detection
    - Drag & Drop: PDF, PNG, JPG, DOCX, TXT
    - Preview: PDF viewer, image zoom, link info, note display
-   - Filter tabs: All, Link, Document, Image, Note
+   - Filter tabs: All, Link, Document, Image, Note, Cloud
    - Tag system + Pin to top
    - Realtime search
    - Sync & Pull with Supabase Cloud
@@ -66,6 +68,51 @@ const Scrapbook = (() => {
     });
   }
 
+  // ── Image Auto-Compression for Mobile ────────────────────────────
+  async function compressImageIfNeeded(file) {
+    if (!file.type || !file.type.startsWith('image/')) return file;
+    if (file.type === 'image/svg+xml' || file.type === 'image/gif') return file;
+    if (file.size < 350 * 1024) return file; // already under 350KB
+
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        let { width, height } = img;
+        const MAX_DIM = 1600;
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width > height) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          } else {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob((blob) => {
+          if (blob && blob.size < file.size) {
+            const newName = (file.name || 'image').replace(/\.[^.]+$/, '.jpg');
+            resolve(new File([blob], newName, { type: 'image/jpeg' }));
+          } else {
+            resolve(file);
+          }
+        }, 'image/jpeg', 0.82);
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve(file); // fallback
+      };
+      img.src = url;
+    });
+  }
+
   // ── Supabase Cloud Sync Helpers ──────────────────────────────────
   async function syncItemToSupabase(item) {
     const user = Auth.getUser();
@@ -76,8 +123,13 @@ const Scrapbook = (() => {
       return false;
     }
 
+    // Safety check for payload size: Supabase REST body limit is ~6MB
+    if (item.content && item.content.length > 4 * 1024 * 1024) {
+      toast('File quá lớn (>4MB) để lưu trực tiếp vào database. File vẫn được lưu an toàn trên máy (IndexedDB).', 'warning');
+      return false;
+    }
+
     try {
-      // 1. Try scrapbook table
       const scrapRecord = {
         id:         item.id,
         user_id:    user.id,
@@ -260,47 +312,67 @@ const Scrapbook = (() => {
     const isCloudUser = user && user.id !== 'local_user';
 
     container.innerHTML = `
+      <!-- Hidden File Inputs for Mobile Compatibility -->
+      <input type="file" id="sb-hidden-file-input" multiple style="display:none" />
+      <input type="file" id="sb-hidden-camera-input" accept="image/*" style="display:none" />
+
       <div class="page-header">
         <div>
           <h2><i class="bi bi-journal-bookmark me-2"></i>Second Brain</h2>
           <div class="small text-muted mt-1">
             <span class="badge-pill ${isCloudUser ? 'badge-success' : 'badge-muted'}" style="font-size:11px">
               <i class="bi ${isCloudUser ? 'bi-cloud-check-fill' : 'bi-hdd'} me-1"></i>
-              ${isCloudUser ? `Supabase: ${sanitize(user.email || 'Đã kết nối')}` : 'Chế độ lưu cục bộ (Offline)'}
+              ${isCloudUser ? `Supabase: ${sanitize(user.email || 'Đã kết nối')}` : 'Lưu trên máy (Offline)'}
             </span>
           </div>
         </div>
 
         <div class="action-bar">
-          <!-- Supabase Sync Actions -->
+          <!-- Mobile direct upload button -->
+          <button class="btn-primary btn-sm" id="sb-mobile-photo-btn">
+            <i class="bi bi-camera-fill"></i> <span class="d-none d-sm-inline">Tải</span> Ảnh
+          </button>
+          <button class="btn-secondary btn-sm" id="sb-mobile-file-btn">
+            <i class="bi bi-folder2-open"></i> File
+          </button>
+
+          <!-- Cloud Sync -->
           <button class="btn-secondary btn-sm" id="sb-sync-all-btn" title="Tải tất cả lên Supabase Cloud">
-            <i class="bi bi-cloud-arrow-up text-primary"></i> <span class="d-none d-sm-inline">Lưu</span> Supabase
+            <i class="bi bi-cloud-arrow-up text-primary"></i> <span class="d-none d-sm-inline">Lưu</span> Cloud
           </button>
           <button class="btn-secondary btn-sm" id="sb-pull-cloud-btn" title="Kéo dữ liệu từ Supabase Cloud về máy">
             <i class="bi bi-cloud-download text-success"></i> <span class="d-none d-sm-inline">Kéo về</span>
           </button>
 
-          <button class="btn-primary btn-sm" id="sb-add-note-btn"><i class="bi bi-plus-lg"></i> Ghi chú</button>
+          <button class="btn-secondary btn-sm" id="sb-add-note-btn"><i class="bi bi-plus-lg"></i> Ghi chú</button>
           <button class="btn-secondary btn-sm" id="sb-add-link-btn"><i class="bi bi-link-45deg"></i> Link</button>
         </div>
       </div>
 
-      <!-- Drop zone -->
+      <!-- Drop zone & Mobile Upload Card -->
       <div class="drop-zone mb-4" id="sb-drop-zone">
-        <i class="bi bi-cloud-arrow-up"></i>
-        <p class="mb-1"><strong>Kéo & Thả file vào đây</strong> (PDF, ảnh, Word, TXT...)</p>
-        <p class="text-muted" style="font-size:12px">Hoặc nhấn <kbd class="kbd">Ctrl+V</kbd> để dán link / ảnh từ clipboard</p>
+        <i class="bi bi-cloud-arrow-up text-primary"></i>
+        <p class="mb-1 fw-semibold fs-6">Chạm hoặc Kéo & Thả để tải lên</p>
+        <p class="text-muted small mb-3">Hình ảnh, ảnh chụp camera, tài liệu PDF, Word, TXT...</p>
+        <div class="d-flex gap-2 justify-content-center flex-wrap">
+          <button type="button" class="btn-primary btn-sm" id="sb-dz-camera-btn">
+            <i class="bi bi-camera me-1"></i> Chụp / Chọn ảnh
+          </button>
+          <button type="button" class="btn-secondary btn-sm" id="sb-dz-file-btn">
+            <i class="bi bi-file-earmark-arrow-up me-1"></i> Chọn tài liệu / PDF
+          </button>
+        </div>
       </div>
 
       <!-- Filter + Search -->
       <div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
         <div class="filter-tabs" id="sb-filter-tabs">
           <button class="filter-tab ${filterType === 'all'      ? 'active' : ''}" data-type="all">Tất cả <span class="badge-pill badge-muted ms-1">${allItems.length}</span></button>
-          <button class="filter-tab ${filterType === 'link'     ? 'active' : ''}" data-type="link">🔗 Link</button>
-          <button class="filter-tab ${filterType === 'document' ? 'active' : ''}" data-type="document">📄 Tài liệu</button>
           <button class="filter-tab ${filterType === 'image'    ? 'active' : ''}" data-type="image">🖼️ Hình</button>
+          <button class="filter-tab ${filterType === 'document' ? 'active' : ''}" data-type="document">📄 Tài liệu</button>
+          <button class="filter-tab ${filterType === 'link'     ? 'active' : ''}" data-type="link">🔗 Link</button>
           <button class="filter-tab ${filterType === 'note'     ? 'active' : ''}" data-type="note">📝 Ghi chú</button>
-          <button class="filter-tab ${filterType === 'cloud'    ? 'active' : ''}" data-type="cloud">☁️ Supabase Cloud</button>
+          <button class="filter-tab ${filterType === 'cloud'    ? 'active' : ''}" data-type="cloud">☁️ Cloud</button>
         </div>
         <div class="search-wrap" style="flex:1;min-width:160px">
           <i class="bi bi-search"></i>
@@ -436,7 +508,7 @@ const Scrapbook = (() => {
     if (items.length === 0) {
       grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
         <i class="bi bi-journal-x"></i>
-        <p>Chưa có mục nào ${filterType === 'cloud' ? 'được lưu trên Supabase Cloud' : ''}. Kéo thả file, dán link, hoặc thêm ghi chú!</p>
+        <p>Chưa có mục nào ${filterType === 'cloud' ? 'được lưu trên Supabase Cloud' : ''}. Chạm để tải ảnh, file, dán link hoặc ghi chú!</p>
       </div>`;
       return;
     }
@@ -466,11 +538,11 @@ const Scrapbook = (() => {
             </div>` : ''}
           </div>
           <div class="scrap-card-actions">
-            <button class="btn-icon ${item.starred ? 'text-success' : ''}" style="width:28px;height:28px;background:var(--clr-surface)" data-cloud="${item.id}" title="${item.starred ? 'Đã lưu trên Supabase Cloud (Click để gỡ)' : 'Lưu vào Supabase Cloud'}">
+            <button class="btn-icon ${item.starred ? 'text-success' : ''}" style="width:30px;height:30px;background:var(--clr-surface)" data-cloud="${item.id}" title="${item.starred ? 'Đã lưu trên Supabase Cloud (Click để gỡ)' : 'Lưu vào Supabase Cloud'}">
               <i class="bi bi-cloud-${item.starred ? 'check-fill text-success' : 'arrow-up'}"></i>
             </button>
-            <button class="btn-icon" style="width:28px;height:28px;background:var(--clr-surface)" data-pin="${item.id}" title="Ghim"><i class="bi bi-pin${item.pinned ? '-fill text-warning' : ''}"></i></button>
-            <button class="btn-icon" style="width:28px;height:28px;background:var(--clr-surface);color:var(--clr-danger)" data-del="${item.id}" title="Xóa"><i class="bi bi-trash3"></i></button>
+            <button class="btn-icon" style="width:30px;height:30px;background:var(--clr-surface)" data-pin="${item.id}" title="Ghim"><i class="bi bi-pin${item.pinned ? '-fill text-warning' : ''}"></i></button>
+            <button class="btn-icon" style="width:30px;height:30px;background:var(--clr-surface);color:var(--clr-danger)" data-del="${item.id}" title="Xóa"><i class="bi bi-trash3"></i></button>
           </div>
         </div>
       `;
@@ -643,6 +715,40 @@ const Scrapbook = (() => {
 
   // ── Bind Events ──────────────────────────────────────────────────
   function bindEvents(container) {
+    // Hidden inputs
+    const fileInput   = el('sb-hidden-file-input');
+    const cameraInput = el('sb-hidden-camera-input');
+
+    if (fileInput) {
+      fileInput.onchange = (e) => {
+        if (e.target.files && e.target.files.length) {
+          handleFiles([...e.target.files]);
+          e.target.value = '';
+        }
+      };
+    }
+
+    if (cameraInput) {
+      cameraInput.onchange = (e) => {
+        if (e.target.files && e.target.files.length) {
+          handleFiles([...e.target.files]);
+          e.target.value = '';
+        }
+      };
+    }
+
+    // Direct upload buttons
+    el('sb-mobile-photo-btn')?.addEventListener('click', () => cameraInput?.click());
+    el('sb-mobile-file-btn')?.addEventListener('click', () => fileInput?.click());
+    el('sb-dz-camera-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      cameraInput?.click();
+    });
+    el('sb-dz-file-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      fileInput?.click();
+    });
+
     // Filter tabs
     el('sb-filter-tabs')?.querySelectorAll('.filter-tab').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -663,22 +769,21 @@ const Scrapbook = (() => {
       renderGrid();
     });
 
-    // Drop zone
+    // Drop zone click (fallback to file picker)
     const dropZone = el('sb-drop-zone');
-    dropZone?.addEventListener('click', () => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.multiple = true;
-      input.accept = '*/*';
-      input.onchange = (e) => handleFiles([...e.target.files]);
-      input.click();
+    dropZone?.addEventListener('click', (e) => {
+      if (e.target.closest('button')) return;
+      fileInput?.click();
     });
+
     dropZone?.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
     dropZone?.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
     dropZone?.addEventListener('drop', (e) => {
       e.preventDefault();
       dropZone.classList.remove('drag-over');
-      handleFiles([...e.dataTransfer.files]);
+      if (e.dataTransfer?.files?.length) {
+        handleFiles([...e.dataTransfer.files]);
+      }
     });
 
     // Paste handler (global when on this page)
@@ -691,7 +796,7 @@ const Scrapbook = (() => {
       const imgItem = items.find(i => i.type.startsWith('image/'));
       if (imgItem) {
         const blob = imgItem.getAsFile();
-        await handleFiles([blob]);
+        if (blob) await handleFiles([blob]);
         return;
       }
 
@@ -855,31 +960,58 @@ const Scrapbook = (() => {
     });
   }
 
-  // ── Handle file drop / select ────────────────────────────────────
+  // ── Handle file drop / select (Robust Mobile Processing) ───────────
   async function handleFiles(files) {
-    for (const file of files) {
-      const isImage = file.type.startsWith('image/');
-      const isPDF   = file.type === 'application/pdf';
-      const type    = isImage ? 'image' : isPDF ? 'document' : 'file';
+    if (!files || files.length === 0) return;
 
-      const dataURL = await new Promise((res, rej) => {
-        const reader = new FileReader();
-        reader.onload  = () => res(reader.result);
-        reader.onerror = rej;
-        reader.readAsDataURL(file);
-      });
+    toast(`Đang xử lý ${files.length} file...`, 'info');
+    let count = 0;
 
-      const item = makeItem(type, {
-        title:    file.name,
-        content:  dataURL,
-        mimeType: file.type,
-        size:     file.size,
-      });
-      await idbPut(item);
-      allItems.unshift(item);
+    for (const rawFile of files) {
+      try {
+        // 1. Auto compress mobile photos
+        const file = await compressImageIfNeeded(rawFile);
+        const isImage = file.type.startsWith('image/');
+        const isPDF   = file.type === 'application/pdf';
+        const type    = isImage ? 'image' : isPDF ? 'document' : 'file';
+
+        // 2. Read as Data URL
+        const dataURL = await new Promise((res, rej) => {
+          const reader = new FileReader();
+          reader.onload  = () => res(reader.result);
+          reader.onerror = () => rej(new Error('Lỗi khi đọc file'));
+          reader.readAsDataURL(file);
+        });
+
+        // 3. Create scrapbook item
+        const item = makeItem(type, {
+          title:    file.name || 'Tài liệu không tên',
+          content:  dataURL,
+          mimeType: file.type || 'application/octet-stream',
+          size:     file.size || 0,
+        });
+
+        // 4. Save to IndexedDB
+        await idbPut(item);
+
+        // 5. If small enough (< 3MB) and user is logged in with Supabase, sync immediately
+        const user = Auth.getUser();
+        if (user && user.id !== 'local_user' && item.size < 3 * 1024 * 1024) {
+          syncItemToSupabase(item).catch(() => {});
+        }
+
+        allItems.unshift(item);
+        count++;
+      } catch (err) {
+        console.error('File handle error', err);
+        toast(`Lỗi xử lý file "${rawFile.name}": ${err.message}`, 'error');
+      }
     }
+
     renderGrid();
-    toast(`Đã lưu ${files.length} file!`, 'success');
+    if (count > 0) {
+      toast(`Đã lưu thành công ${count} mục!`, 'success');
+    }
   }
 
   return { render };
